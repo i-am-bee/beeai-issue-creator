@@ -76,7 +76,7 @@ async def get_agent_orchestrate():
     except ToolNotFoundError as e:
         raise RuntimeError(f"Failed to configure orchestrator agent: {e}") from e
 
-    repository = os.getenv('GITHUB_REPOSITORY', 'matoushavlena/bee-agent-framework')
+    repository = os.getenv("GITHUB_REPOSITORY")
     instruction = f"""You are an orchestrator.
 You do not enrich or add content yourself.  
 Your job is to hand off tasks to the right experts, guide the workflow, and keep the user in control.
@@ -142,9 +142,7 @@ You manage the **full lifecycle of a GitHub issue** — from user request to fin
         ],
         requirements=[
             ConditionalRequirement(ThinkTool, force_at_step=1),
-            # ConditionalRequirement(handoff_draft, force_at_step=2),
             ConditionalRequirement(handoff_find_duplicates, only_after=[handoff_draft]),
-            # ConditionalRequirement(create_issue_tool, only_after=[handoff_find_duplicates]),
             AskPermissionRequirement(create_issue_tool),
         ],
     )
@@ -153,7 +151,7 @@ You manage the **full lifecycle of a GitHub issue** — from user request to fin
 @server.agent(
     metadata=Metadata(
         annotations=Annotations(
-            beeai_ui=PlatformUIAnnotation(ui_type=PlatformUIType.CHAT, display_name="GitHub Orchestrator")
+            beeai_ui=PlatformUIAnnotation(ui_type=PlatformUIType.CHAT, display_name="GitHub Issue Creator")
         )
     )
 )
