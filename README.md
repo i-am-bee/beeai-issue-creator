@@ -74,6 +74,9 @@ API_KEY=your_api_key_here
 GITHUB_PAT=your_github_personal_access_token
 GITHUB_REPOSITORY=owner/repository-name
 
+# Documentation for issue grounding (optional)
+DOCS_URL=https://example.com/llms-full.txt
+
 # Issue Templates (URLs preferred)
 TEMPLATE_BUG_URL="https://raw.githubusercontent.com/user/repo/main/.github/ISSUE_TEMPLATE/bug_report.md"
 TEMPLATE_FEATURE_URL="https://raw.githubusercontent.com/user/repo/main/.github/ISSUE_TEMPLATE/feature_request.md"

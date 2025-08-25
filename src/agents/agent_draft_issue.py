@@ -57,7 +57,9 @@ def _strip_yaml_frontmatter(content: str) -> str:
 async def get_agent_draft_issue():
     """Get the GitHub Issue Drafter agent"""
 
-    docs = await fetch_content("https://framework.beeai.dev/llms-full.txt")
+    # Get documentation content from environment variable
+    docs_url = os.getenv("DOCS_URL")
+    docs = await fetch_content(docs_url) if docs_url else ""
 
     # Get both templates
     bug_template = await get_template("bug")
@@ -131,7 +133,9 @@ Stay focused. Your role is narrow by design — stick to drafting GitHub issues 
     metadata=Metadata(
         annotations=Annotations(
             beeai_ui=PlatformUIAnnotation(ui_type=PlatformUIType.CHAT, display_name="GitHub Issue Drafter")
-        )
+        ),
+        framework="BeeAI",
+        license="Apache 2.0",
     )
 )
 async def draft_issue(input: list[Message], context: Context) -> AsyncGenerator[RunYield, RunYieldResume]:
