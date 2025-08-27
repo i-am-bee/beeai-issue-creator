@@ -10,9 +10,9 @@ A multi-agent system for creating well-structured GitHub issues using the [BeeAI
 
 The BeeAI Issue Creator orchestrates a multi-step workflow using specialized agents:
 
-- **Orchestrator**: Coordinates the entire workflow and manages agent handoffs
-- **Issue Drafter**: Creates structured issue drafts from user input using templates, grounded with project documentation for technical accuracy
-- **Duplicate Finder**: Searches for existing similar issues to prevent duplicates
+- **Project Manager**: Coordinates the entire workflow and manages agent handoffs
+- **Technical Writer**: Creates structured issue drafts from user input using templates, grounded with project documentation for technical accuracy
+- **Analyst**: Searches for existing similar issues to prevent duplicates
 
 This gives you consistent, professional GitHub issues while preventing duplicates and maintaining quality standards. The system integrates with GitHub through the [GitHub MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/github) for seamless repository interactions.
 
@@ -26,14 +26,14 @@ Perfect for:
 
 ## Agents Included
 
-🎯 **[Orchestrator](src/agents/agent_orchestrate.py)** - Manages the complete issue lifecycle from draft to creation  
-📝 **[Issue Drafter](src/agents/agent_draft_issue.py)** - Creates structured issues using customizable templates  
-🔍 **[Duplicate Finder](src/agents/agent_find_duplicates.py)** - Searches for similar existing issues
+🎯 **[Project Manager](src/agents/agent_manager.py)** - Manages the complete issue lifecycle from draft to creation  
+📝 **[Technical Writer](src/agents/agent_writer.py)** - Creates structured issues using customizable templates  
+🔍 **[Analyst](src/agents/agent_analyst.py)** - Searches for similar existing issues
 
 ## Features
 
 - **Template Support**: Bug report and feature request templates
-- **Documentation Grounding**: Issue Drafter uses project documentation for technical accuracy
+- **Documentation Grounding**: Technical Writer uses project documentation for technical accuracy
 - **GitHub Integration**: Seamless interaction through GitHub MCP server
 - **Trajectory Tracking**: Real-time visibility into agent interactions and tool usage
 - **Duplicate Prevention**: Intelligent search for existing similar issues
@@ -54,10 +54,7 @@ cp .env.example .env
 uv run server
 ```
 
-The server will start on `http://127.0.0.1:8000` and register three agents:
-- `orchestrate` - Main workflow coordinator
-- `draft_issue` - Issue drafting specialist
-- `find_duplicates` - Duplicate detection specialist
+The server will start on `http://127.0.0.1:8000` and register the GitHub Issue Creator agent that coordinates the complete workflow.
 
 ## Configuration
 
@@ -108,8 +105,8 @@ A clear and concise description of what you expected to happen.
 ## Workflow
 
 1. **User Input**: Describe the bug or feature request
-2. **Draft Creation**: Issue Drafter creates structured draft using templates
-3. **Duplicate Check**: Duplicate Finder searches for similar existing issues
+2. **Draft Creation**: Technical Writer creates structured draft using templates
+3. **Duplicate Check**: Analyst searches for similar existing issues
 4. **User Review**: User reviews and approves the draft
 5. **Issue Creation**: Final GitHub issue is created with proper formatting
 

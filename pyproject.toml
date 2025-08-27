@@ -8,12 +8,12 @@ authors = [
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11,<4.0"
 dependencies = [
-    "acp-sdk>=0.13.0",
-    "beeai-framework>=0.1.36",
+    "beeai-framework>=0.1.38",
     "aiohttp>=3.8.0",
     "mcp>=1.0.0",
     "python-dotenv>=1.0.0",
     "openinference-instrumentation-beeai>=0.1.6",
+    "beeai-sdk>=0.3.1",
 ]
 
 [project.optional-dependencies]
@@ -27,7 +27,7 @@ line-length = 120
 target-version = "py311"
 
 [project.scripts]
-server = "agents.server:run"
+server = "agents.server:main"
 test = "agents.test:run"
 
 [tool.hatch.build.targets.wheel]

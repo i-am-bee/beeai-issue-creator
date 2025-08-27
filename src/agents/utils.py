@@ -1,7 +1,7 @@
 import os
 
 import aiohttp
-from beeai_framework.backend import AssistantMessage, ChatModel, Message, UserMessage
+from beeai_framework.backend import ChatModel
 from beeai_framework.tools import Tool
 from dotenv import load_dotenv
 
@@ -50,14 +50,6 @@ async def get_tools_by_names(tools: list[Tool], tool_names: list[str]) -> list[T
         raise ToolNotFoundError(f"Required tools {missing_tools} not found. Available tools: {available_tool_names}")
 
     return available_tools
-
-
-def to_framework_message(role: str, content: str) -> Message:
-    match role:
-        case "user":
-            return UserMessage(content)
-        case _:
-            return AssistantMessage(content)
 
 
 async def fetch_content(url: str) -> str:
