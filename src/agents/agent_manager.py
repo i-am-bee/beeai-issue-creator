@@ -102,8 +102,7 @@ async def get_agent_manager():
             create_issue,
         ],
         requirements=[
-            ConditionalRequirement(ThinkTool, force_at_step=1, consecutive_allowed=False),
-            # ConditionalRequirement(handoff_analyst, only_after=[handoff_writer]),
+            ConditionalRequirement(ThinkTool, force_at_step=1, force_after=[Tool], consecutive_allowed=False),
             # AskPermissionRequirement(create_issue),
         ],
         middlewares=[GlobalTrajectoryMiddleware(included=[Tool])],
