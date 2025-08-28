@@ -3,7 +3,7 @@
 > [!WARNING]
 > This project is in early beta stage. Expect bugs and breaking changes.
 
-A multi-agent system for creating well-structured GitHub issues using the [BeeAI Framework](https://framework.beeai.dev/experimental/requirement-agent). This system coordinates between specialized agents to draft issues, check for duplicates, and create final GitHub issues with customizable templates.
+A multi-agent system for creating well-structured GitHub issues using the [BeeAI Framework](https://framework.beeai.dev/experimental/requirement-agent). This system coordinates between specialized agents to draft issues, check for duplicates, and create final GitHub issues with customizable templates. Can be consumed through the [BeeAI Platform](https://beeai.dev) (UI and CLI) via A2A protocol.
 
 ✅ Multi-agent workflow  
 🔄 Real-time trajectory tracking  
