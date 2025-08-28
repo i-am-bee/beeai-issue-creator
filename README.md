@@ -1,6 +1,7 @@
 # BeeAI Issue Creator
 
-⚠️ **Early Beta**: This project is in early beta stage. Expect bugs and breaking changes.
+> [!WARNING]
+> This project is in early beta stage. Expect bugs and breaking changes.
 
 A multi-agent system for creating well-structured GitHub issues using the [BeeAI Framework](https://framework.beeai.dev/experimental/requirement-agent). This system coordinates between specialized agents to draft issues, check for duplicates, and create final GitHub issues with customizable templates.
 
@@ -60,11 +61,12 @@ The server will start on `http://127.0.0.1:8000` and register the GitHub Issue C
 
 ## Security Considerations
 
-⚠️ **Important Security Notes:**
-
-- **GitHub Token Scoping**: It is **critical** to scope your GitHub Personal Access Token (GITHUB_PAT) to only the specific repositories you intend to use with this system. Do not use tokens with broad repository access.
-
-- **Approval Feature Not Functional**: The user approval/permission feature is currently not working correctly. This means the agent **will create GitHub issues without explicit user approval**. Review all generated content carefully and ensure your GitHub token has appropriate restrictions.
+> [!WARNING]
+> **Important Security Notes:**
+> 
+> - **GitHub Token Scoping**: It is **critical** to scope your GitHub Personal Access Token (GITHUB_PAT) to only the specific repositories you intend to use with this system. Do not use tokens with broad repository access.
+> 
+> - **Approval Feature Not Functional**: The user approval/permission feature is currently not working correctly. This means the agent **will create GitHub issues without explicit user approval**. Review all generated content carefully and ensure your GitHub token has appropriate restrictions.
 
 ## Configuration
 
