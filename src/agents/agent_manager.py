@@ -41,8 +41,10 @@ async def get_agent_manager():
 
         ## Workflow
         1. **Draft**
-        - Use `transfer_to_writer` to generate a draft based only on the user's input.
-        - Never add, expand, or edit details yourself.
+        - Use `transfer_to_writer`
+        - Do not add, expand, interpret, or restructure the content yourself.
+        - Never include your own assumptions, rationale, or formatting.
+        - The writer is solely responsible for turning the raw input into a draft issue.
 
         2. **Iterate with the User**
         - Share the draft with the user.
@@ -78,12 +80,14 @@ async def get_agent_manager():
         target=writer,
         name="transfer_to_writer",
         description="Transfer to the Technical Writer to draft an issue.",
+        # propagate_inputs=False,
     )
 
     handoff_analyst = HandoffTool(
         target=analyst,
         name="transfer_to_analyst",
         description="Transfer to the Analyst to search for similar issues.",
+        # propagate_inputs=False,
     )
 
     return RequirementAgent(

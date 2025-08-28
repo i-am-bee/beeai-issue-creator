@@ -21,6 +21,12 @@ async def run():
     server.register(
         manager,
         name="GitHub Issue Creator",
+        description=dedent(
+            """\
+            Creates well-structured, actionable GitHub issues from user descriptions of bugs or feature requests.
+            Uses project documentation and templates to ensure consistency and completeness.
+            """
+        ),
         default_input_modes=["text"],
         default_output_modes=["text"],
         detail=AgentDetail(
@@ -31,10 +37,12 @@ async def run():
             AgentSkill(
                 id="create_github_issue",
                 name="Create GitHub Issue",
-                description=dedent("""
-                Creates well-structured, actionable GitHub issues from user descriptions of bugs or feature requests.
-                Uses project documentation and templates to ensure consistency and completeness.
-                """),
+                description=dedent(
+                    """\
+                    Creates well-structured, actionable GitHub issues from user descriptions of bugs or feature requests.
+                    Uses project documentation and templates to ensure consistency and completeness.
+                    """
+                ),
                 tags=["GitHub", "Issues", "Bug Reports", "Feature Requests", "Documentation"],
                 examples=[
                     "The login form crashes when I enter special characters in the password field",

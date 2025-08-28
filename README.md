@@ -56,6 +56,14 @@ uv run server
 
 The server will start on `http://127.0.0.1:8000` and register the GitHub Issue Creator agent that coordinates the complete workflow.
 
+## Security Considerations
+
+⚠️ **Important Security Notes:**
+
+- **GitHub Token Scoping**: It is **critical** to scope your GitHub Personal Access Token (GITHUB_PAT) to only the specific repositories you intend to use with this system. Do not use tokens with broad repository access.
+
+- **Approval Feature Not Functional**: The user approval/permission feature is currently not working correctly. This means the agent **will create GitHub issues without explicit user approval**. Review all generated content carefully and ensure your GitHub token has appropriate restrictions.
+
 ## Configuration
 
 ### Environment Variables
@@ -81,25 +89,6 @@ TEMPLATE_FEATURE_URL="https://raw.githubusercontent.com/user/repo/main/.github/I
 # Alternative: Direct template content
 TEMPLATE_BUG="your bug report template..."
 TEMPLATE_FEATURE="your feature request template..."
-```
-
-### Template Format
-
-Templates use standard Markdown format:
-
-```markdown
-**Describe the bug**
-A clear and concise description of what the bug is.
-
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
-
-**Expected behavior**
-A clear and concise description of what you expected to happen.
 ```
 
 ## Workflow
@@ -137,15 +126,16 @@ For more information on the BeeAI Framework: https://framework.beeai.dev
 
 ## Roadmap
 
-- [ ] **Improve multi-turn conversations** - Better context handling across multiple interactions
+- [x] **Improve multi-turn conversations** - Better context handling across multiple interactions
 - [ ] **Add evaluation datasets** - Comprehensive testing with real-world issue examples  
 - [ ] **MCP direct repository configuration** - Pre-configure the MCP tool with repository settings instead of relying on LLM to pass repository name
 - [ ] **Improve agent configuration** - Configure GitHub repository from BeeAI Platform UI
-- [ ] **Improve trajectory metadata** - Enhanced progress tracking and debugging capabilities
+- [x] **Improve trajectory metadata** - Enhanced progress tracking and debugging capabilities
 - [ ] **Add RAG instead of grounding** - Dynamic document retrieval for better context
 - [ ] **Add streaming support** - Real-time response streaming for better UX
 - [ ] **Build as Docker image** - Containerized deployment for easier hosting
 - [ ] **Elicitation support** - Interactive tool use approval and clarification workflows
+- [ ] **Artefact support** - Enable rich content generation and interactive editing capabilities
 
 ## Contributing
 
