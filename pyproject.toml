@@ -8,7 +8,7 @@ authors = [
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11,<4.0"
 dependencies = [
-    "beeai-framework>=0.1.38",
+    "beeai-framework>=0.1.39",
     "aiohttp>=3.8.0",
     "mcp>=1.0.0",
     "python-dotenv>=1.0.0",

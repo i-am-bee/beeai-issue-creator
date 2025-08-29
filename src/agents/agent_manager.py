@@ -80,14 +80,14 @@ async def get_agent_manager():
         target=writer,
         name="transfer_to_writer",
         description="Transfer to the Technical Writer to draft an issue.",
-        # propagate_inputs=False,
+        propagate_inputs=False,
     )
 
     handoff_analyst = HandoffTool(
         target=analyst,
         name="transfer_to_analyst",
         description="Transfer to the Analyst to search for similar issues.",
-        # propagate_inputs=False,
+        propagate_inputs=False,
     )
 
     return RequirementAgent(
