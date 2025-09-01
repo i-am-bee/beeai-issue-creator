@@ -130,15 +130,15 @@ For more information on the BeeAI Framework: https://framework.beeai.dev
 
 ## Roadmap
 
-- [x] **Improve multi-turn conversations** - Better context handling across multiple interactions
+- [ ] 🚧 **Improve multi-turn conversations** - Better context handling across multiple interactions
 - [ ] **Add evaluation datasets** - Comprehensive testing with real-world issue examples  
-- [ ] **MCP direct repository configuration** - Pre-configure the MCP tool with repository settings instead of relying on LLM to pass repository name
+- [x] **MCP direct repository configuration** - Pre-configure the MCP tool with repository settings instead of relying on LLM to pass repository name
 - [ ] **Improve agent configuration** - Configure GitHub repository from BeeAI Platform UI
 - [x] **Improve trajectory metadata** - Enhanced progress tracking and debugging capabilities
 - [ ] **Add RAG instead of grounding** - Dynamic document retrieval for better context
 - [ ] **Add streaming support** - Real-time response streaming for better UX
 - [ ] **Build as Docker image** - Containerized deployment for easier hosting
-- [ ] **Elicitation support** - Interactive tool use approval and clarification workflows
+- [ ] 🚧 **Elicitation support** - Interactive tool use approval and clarification workflows
 - [ ] **Artefact support** - Enable rich content generation and interactive editing capabilities
 
 ## Contributing

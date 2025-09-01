@@ -5,7 +5,7 @@ from beeai_framework.agents.experimental.requirements.conditional import Conditi
 from beeai_framework.middleware.trajectory import GlobalTrajectoryMiddleware
 from beeai_framework.tools import Tool
 
-from agents.utils import ToolNotFoundError, get_tools_by_names, llm, session_manager
+from agents.utils import ToolNotFoundError, get_tools_by_names, llm, session_manager, create_repo_scoped_tool
 
 
 async def get_agent_analyst():
@@ -14,7 +14,12 @@ async def get_agent_analyst():
     tool_names = ["get_issue", "list_issues", "search_issues"]
 
     try:
-        available_tools = await get_tools_by_names(tools, tool_names)
+        original_tools = await get_tools_by_names(tools, tool_names)
+        # Create repo-scoped versions of all tools
+        available_tools = []
+        for tool in original_tools:
+            scoped_tool = await create_repo_scoped_tool(tool)
+            available_tools.append(scoped_tool)
     except ToolNotFoundError as e:
         raise RuntimeError(f"Failed to configure duplicate finder agent: {e}") from e
 

@@ -11,7 +11,7 @@ from beeai_framework.tools.think import ThinkTool
 
 from agents.agent_analyst import get_agent_analyst
 from agents.agent_writer import get_agent_writer
-from agents.utils import ToolNotFoundError, get_tools_by_names, llm, session_manager
+from agents.utils import ToolNotFoundError, create_repo_scoped_tool, get_tools_by_names, llm, session_manager
 
 
 async def get_agent_manager():
@@ -20,7 +20,9 @@ async def get_agent_manager():
 
     try:
         tools = await get_tools_by_names(tools, ["create_issue"])
-        create_issue = tools[0]
+        original_create_issue = tools[0]
+
+        create_issue = await create_repo_scoped_tool(original_create_issue)
     except ToolNotFoundError as e:
         raise RuntimeError(f"Failed to configure the agent: {e}") from e
 
