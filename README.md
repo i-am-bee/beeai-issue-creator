@@ -97,6 +97,38 @@ TEMPLATE_FEATURE="your feature request template..."
 
 ## Workflow
 
+```mermaid
+flowchart TD
+    A[👤 User Input<br/>Bug/Feature Description] --> B[🎯 Project Manager<br/>Workflow Coordination]
+    
+    B --> C[📝 Technical Writer]
+    C --> D[📄 Draft Created<br/>with Templates]
+    D --> E[👤 User Approval<br/>Approve/Request Changes]
+    
+    E -->|Changes| C
+    E -->|Approved| F[🔍 Analyst]
+    
+    F --> G[🔎 Search Similar Issues<br/>via GitHub MCP]
+    G --> H[📋 Duplicate Report]
+    H --> I[👤 Final Confirmation]
+    
+    I --> J[🚀 Create GitHub Issue<br/>via GitHub MCP]
+    
+    K[📚 Templates<br/>Bug/Feature] -.-> C
+    L[📖 Documentation<br/>Grounding] -.-> C
+    M[🔧 GitHub MCP Server<br/>Issues API] -.-> F
+    M -.-> J
+    
+    style A fill:#e1f5fe
+    style B fill:#fff3e0
+    style C fill:#f3e5f5
+    style F fill:#e8f5e8
+    style J fill:#e8f5e8
+    style K fill:#f0f0f0
+    style L fill:#f0f0f0
+    style M fill:#f0f0f0
+```
+
 1. **User Input**: Describe the bug or feature request
 2. **Draft Creation**: Technical Writer creates structured draft using templates
 3. **Duplicate Check**: Analyst searches for similar existing issues
@@ -140,6 +172,7 @@ For more information on the BeeAI Framework: https://framework.beeai.dev
 - [ ] **Build as Docker image** - Containerized deployment for easier hosting
 - [ ] 🚧 **Elicitation support** - Interactive tool use approval and clarification workflows
 - [ ] **Artefact support** - Enable rich content generation and interactive editing capabilities
+- [ ] **GitHub Lables and Type field** - Allow the agent to correctly populate the labels and type fields
 
 ## Contributing
 

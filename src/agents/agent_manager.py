@@ -2,15 +2,20 @@ import os
 from textwrap import dedent
 
 from beeai_framework.agents.experimental import RequirementAgent
+from beeai_framework.agents.experimental.prompts import (
+    RequirementAgentSystemPromptInput,
+    RequirementAgentTaskPromptInput,
+)
 from beeai_framework.agents.experimental.requirements.ask_permission import AskPermissionRequirement
 from beeai_framework.agents.experimental.requirements.conditional import ConditionalRequirement
 from beeai_framework.middleware.trajectory import GlobalTrajectoryMiddleware
+from beeai_framework.template import PromptTemplate, PromptTemplateInput
 from beeai_framework.tools import Tool
 from beeai_framework.tools.handoff import HandoffTool
-from beeai_framework.tools.think import ThinkTool
 
 from agents.agent_analyst import get_agent_analyst
 from agents.agent_writer import get_agent_writer
+from agents.simple_think import SimpleThinkTool
 from agents.utils import ToolNotFoundError, create_repo_scoped_tool, get_tools_by_names, llm, session_manager
 
 
@@ -28,49 +33,54 @@ async def get_agent_manager():
 
     repository = os.getenv("GITHUB_REPOSITORY")
 
-    role = "helpful project manager"
+    role = "helpful coordinator"
     instruction = dedent(
         f"""\
-        Your job is to hand off tasks to the right experts, run the process step by step, and keep all communication with the user.
-        You don't do the actual writing yourself — you guide the workflow, keep the user in control, and ensure everything moves forward smoothly.
-
+        As the Coordinator, your responsibilities include routing tasks to experts, managing processes sequentially, and handling all user-facing communication. You do not perform technical writing or reasoning yourself.
+        
         You work in the following repository: {repository}
 
-        ## Responsibilities
-        You manage the full lifecycle of a GitHub issue — from user request to final creation.
-        You keep all communication with the user, always validate with them before taking action, and make sure the process moves step by step.
-        You don't do the actual writing yourself — you coordinate experts, guide the workflow, and keep the user in control.
+        ## Operating Principles
+        - Manage the full lifecycle of a GitHub issue from user request to creation.
+        - Keep the user in control; never move forward without explicit consent.
+        - Communicate with the user only when a phase is complete or when experts request clarifications.
+        - Do not dispatch placeholder or deferred instructions (e.g., “HOLD”, “wait until approval”, “queue this”). Only issue tool calls that can execute immediately in the current phase.
 
-        ## Workflow
-        1. **Draft**
-        - Use `transfer_to_writer`
-        - Do not add, expand, interpret, or restructure the content yourself.
-        - Never include your own assumptions, rationale, or formatting.
-        - The writer is solely responsible for turning the raw input into a draft issue.
+        ## Phases
 
-        2. **Iterate with the User**
-        - Share the draft with the user.
-        - Ask for feedback or changes.
-        - Support multiple rounds of revision until the user explicitly approves the issue content.
+        ### 1) Draft
+        - Action: call `transfer_to_writer`.
+        - Do not add, expand, interpret, or restructure the user’s request yourself.
+        - If the writer asks for clarification, relay the question verbatim to the user.
+        - Relay policy for drafts:
+            - Return the writer's draft to the user **exactly as received**.
+            - Place your questions/notes **outside** the fence.
 
-        3. **Check duplicates**
-        - After the user approves the draft, use `transfer_to_analyst` to search for similar issues.
-        - If duplicates are found, present them to the user.
-            - If the user decides it's a duplicate, stop the process.
-            - If the user wants to continue, proceed with creation and note the duplicate context.
-        - If no duplicates are found, continue.
+        ### 2) Review / Approval
+        - Action: call `final_answer` to share the draft exactly as received and ask: "Approve as-is, or request changes?"
+        - If changes are requested, return to **Draft**.
+        - Treat any of these as explicit approval: “approve”, “approved”, “looks good”, “LGTM”, “ship it”, “create it”, “go ahead”, “proceed”, “yes, create”.
 
-        4. **Create the Issue**  
-        - Only after explicit user confirmation (e.g., “approve,” “looks good,” “create it”), use create_issue to create the GitHub issue.
-        - Confirm with the user once done by sending a `final_answer`.
+        ### 3) Duplicate Check
+        - After approval, call `transfer_to_analyst` to search for similar issues.
+        - If duplicates found: let user decide to stop or continue.
+        - If unclear: ask user for refined search terms.
 
-        ## Guidelines
-        - Always proceed step by step.
-        - Use a professional, neutral tone.
-        - Never mention agents, handoffs, or internal mechanisms.
-        - Always return drafts wrapped in ```.
-        - If the user input is unclear, ask clarifying questions.
-        - Never skip the user feedback loop before creation.
+        ### 4) Create
+        - Only after explicit user confirmation, call `create_issue`.
+        - Then send brief confirmation with link/ID via `final_answer`.
+
+        ## Output Rules
+        - Tone: professional, neutral, concise, and actionable.
+
+        ## Reasoning Discipline
+        - Do not summarize, expand, or rewrite expert output.
+        - Do not anticipate clarifications yourself. Relay them only if explicitly requested by an expert.
+        - If the next step is to communicate with the user, **call `final_answer` now** (do not call other tools or pre-stage future work).
+
+        ## Guardrails
+        - It is acceptable to remain in a phase across multiple messages until ready to proceed.
+        - Attempt a first pass autonomously unless critical input is missing; if so, stop and request clarification before proceeding.
         """
     )
 
@@ -81,15 +91,54 @@ async def get_agent_manager():
     handoff_writer = HandoffTool(
         target=writer,
         name="transfer_to_writer",
-        description="Transfer to the Technical Writer to draft an issue.",
+        description="Assign to Technical Writer for drafting.",
         propagate_inputs=False,
     )
 
     handoff_analyst = HandoffTool(
         target=analyst,
         name="transfer_to_analyst",
-        description="Transfer to the Analyst to search for similar issues.",
-        propagate_inputs=False,
+        description="Assign to Analyst for duplicate issue search.",
+        # propagate_inputs=False,
+    )
+
+    template = dedent(
+        """\
+        # Role
+        Assume the role of {{role}}.
+
+        # Instructions
+        {{#instructions}}
+        {{&.}}
+        {{/instructions}}
+        {{#final_answer_schema}}
+        The final answer must fulfill the following.
+
+        ```
+        {{&final_answer_schema}}
+        ```
+        {{/final_answer_schema}}
+        {{#final_answer_instructions}}
+        {{&final_answer_instructions}}
+        {{/final_answer_instructions}}
+
+        IMPORTANT: The facts mentioned in the final answer must be backed by evidence provided by relevant tool outputs.
+
+        # Tools
+        Never use the tool twice with the same input if not stated otherwise.
+
+        {{#tools.0}}
+        {{#tools}}
+        Name: {{name}}
+        Description: {{description}}
+
+        {{/tools}}
+        {{/tools.0}}
+
+        {{#notes}}
+        {{&.}}
+        {{/notes}}
+        """,
     )
 
     return RequirementAgent(
@@ -98,14 +147,19 @@ async def get_agent_manager():
         role=role,
         instructions=instruction,
         tools=[
-            ThinkTool(),
+            SimpleThinkTool(),
             handoff_writer,
             handoff_analyst,
             create_issue,
         ],
         requirements=[
-            ConditionalRequirement(ThinkTool, force_at_step=1, force_after=[Tool], consecutive_allowed=False),
+            ConditionalRequirement(SimpleThinkTool, force_at_step=1, force_after=[Tool], consecutive_allowed=False),
             # AskPermissionRequirement(create_issue),
         ],
+        templates={
+            "system": PromptTemplate(PromptTemplateInput(schema=RequirementAgentSystemPromptInput, template=template)),
+            # "task": PromptTemplate(PromptTemplateInput(schema=RequirementAgentTaskPromptInput, template="{{prompt}}")),
+        },
+        save_intermediate_steps=False,
         middlewares=[GlobalTrajectoryMiddleware(included=[Tool])],
     )

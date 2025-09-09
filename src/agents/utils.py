@@ -83,9 +83,6 @@ async def create_repo_scoped_tool(original_tool: Tool) -> Tool:
 
     owner, repo = repository.split("/")
 
-    # Debug: Print the original schema to understand the structure
-    print(f"Original {original_tool.name} schema:", original_tool.input_schema.model_json_schema())
-
     # Create input models based on the actual schemas (removing owner/repo)
     if original_tool.name == "search_issues":
 
