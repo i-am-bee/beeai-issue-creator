@@ -164,15 +164,17 @@ For more information on the BeeAI Framework: https://framework.beeai.dev
 
 - [ ] 🚧 **Improve multi-turn conversations** - Better context handling across multiple interactions
 - [ ] **Add evaluation datasets** - Comprehensive testing with real-world issue examples  
-- [x] **MCP direct repository configuration** - Pre-configure the MCP tool with repository settings instead of relying on LLM to pass repository name
 - [ ] **Improve agent configuration** - Configure GitHub repository from BeeAI Platform UI
-- [x] **Improve trajectory metadata** - Enhanced progress tracking and debugging capabilities
 - [ ] **Add RAG instead of grounding** - Dynamic document retrieval for better context
 - [ ] **Add streaming support** - Real-time response streaming for better UX
 - [ ] **Build as Docker image** - Containerized deployment for easier hosting
-- [ ] 🚧 **Elicitation support** - Interactive tool use approval and clarification workflows
 - [ ] **Artefact support** - Enable rich content generation and interactive editing capabilities
-- [ ] **GitHub Lables and Type field** - Allow the agent to correctly populate the labels and type fields
+- [ ] **GitHub Lables field** - Allow the agent to correctly populate the labels ([#312](https://github.com/github/github-mcp-server/issues/312))
+- [ ] **Support attachements** - Allow users to upload files (screenshots, videos)
+- [x] **GitHub Type field** - Allow the agent to correctly populate the type field
+- [x] **MCP direct repository configuration** - Pre-configure the MCP tool with repository settings instead of relying on LLM to pass repository name
+- [x] **Improve trajectory metadata** - Enhanced progress tracking and debugging capabilities
+- [x] **Elicitation support** - Interactive tool use approval and clarification workflows
 
 ## Contributing
 

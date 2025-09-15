@@ -1,5 +1,6 @@
 import os
-from typing import Literal, Optional
+from enum import Enum
+from typing import Literal, Optional, Union
 
 import aiohttp
 from beeai_framework.backend import ChatModel
@@ -11,7 +12,7 @@ from agents.session_manager import SessionManager
 
 load_dotenv()
 
-model = os.getenv("MODEL", "openai:gpt-5-nano")
+model = os.getenv("MODEL", "openai:gpt-5-mini")
 llm = ChatModel.from_name(model, {"api_key": os.getenv("API_KEY")})
 
 # Shared singleton instance
@@ -131,12 +132,18 @@ async def create_repo_scoped_tool(original_tool: Tool) -> Tool:
         class CreateIssueInput(BaseModel):
             title: str  # Required
             body: Optional[str] = None  # Optional
-            labels: Optional[list[str]] = None  # Optional
-            assignees: Optional[list[str]] = None  # Optional
-            milestone: Optional[int] = None  # Optional
+            # labels: Optional[list[str]] = None  # Optional
+            # assignees: Optional[list[str]] = None  # Optional
+            # milestone: Optional[int] = None  # Optional
             type: Optional[str] = None  # Optional
 
         input_schema = CreateIssueInput
+    elif original_tool.name == "list_issue_types":
+
+        class ListIssueTypesInput(BaseModel):
+            pass
+
+        input_schema = ListIssueTypesInput
     else:
         # Fallback: use the original tool without wrapping
         return original_tool
@@ -148,7 +155,11 @@ async def create_repo_scoped_tool(original_tool: Tool) -> Tool:
         filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ["owner", "repo"]}
 
         # Add the hardcoded owner and repo to the parameters (always programmatically set)
-        params = {"owner": owner, "repo": repo, **filtered_kwargs}
+        if original_tool.name == "list_issue_types":
+            # list_issue_types only needs owner, not repo
+            params = {"owner": owner, **filtered_kwargs}
+        else:
+            params = {"owner": owner, "repo": repo, **filtered_kwargs}
 
         # Call the original tool
         result = await original_tool.run(params)

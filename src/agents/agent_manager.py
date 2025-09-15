@@ -1,5 +1,6 @@
+import json
 import os
-from textwrap import dedent
+from textwrap import dedent, indent
 
 from beeai_framework.agents.experimental import RequirementAgent
 from beeai_framework.agents.experimental.prompts import (
@@ -24,65 +25,92 @@ async def get_agent_manager():
     tools = await session_manager.get_tools()
 
     try:
-        tools = await get_tools_by_names(tools, ["create_issue"])
-        original_create_issue = tools[0]
+        tools = await get_tools_by_names(tools, ["create_issue", "list_issue_types"])
 
-        create_issue = await create_repo_scoped_tool(original_create_issue)
+        create_issue = None
+        list_issue_types = None
+
+        for tool in tools:
+            if tool.name == "create_issue":
+                create_issue = await create_repo_scoped_tool(tool)
+            elif tool.name == "list_issue_types":
+                list_issue_types = await create_repo_scoped_tool(tool)
+
     except ToolNotFoundError as e:
         raise RuntimeError(f"Failed to configure the agent: {e}") from e
+
+    # Get issue types with fallback
+    fallback_types = [
+        {"name": "Feature", "description": "A request, idea, or new functionality."},
+        {"name": "Bug", "description": "An unexpected problem or behavior"},
+    ]
+
+    try:
+        response = await list_issue_types.run(input={})
+        issue_types_data = json.loads(response) if response else fallback_types
+    except Exception:
+        # Fallback to default types on any error (including 404)
+        issue_types_data = fallback_types
+
+    issue_types_lines = [f"- {issue_type['name']}: {issue_type['description']}" for issue_type in issue_types_data]
+    issue_types_text = indent("\n".join(issue_types_lines), "    ")
 
     repository = os.getenv("GITHUB_REPOSITORY")
 
     role = "helpful coordinator"
-    instruction = dedent(
-        f"""\
-        As the Coordinator, your responsibilities include routing tasks to experts, managing processes sequentially, and handling all user-facing communication. You do not perform technical writing or reasoning yourself.
-        
-        You work in the following repository: {repository}
+    instruction = f"""\
+As the Coordinator, your responsibilities include routing tasks to experts, managing processes sequentially, and handling all user-facing communication. You do not perform technical writing or reasoning yourself.
 
-        ## Operating Principles
-        - Manage the full lifecycle of a GitHub issue from user request to creation.
-        - Keep the user in control; never move forward without explicit consent.
-        - Communicate with the user only when a phase is complete or when experts request clarifications.
-        - Do not dispatch placeholder or deferred instructions (e.g., “HOLD”, “wait until approval”, “queue this”). Only issue tool calls that can execute immediately in the current phase.
+You work in the following repository: {repository}
 
-        ## Phases
+## Operating Principles
+- Manage the full lifecycle of a GitHub issue from user request to creation.
+- Keep the user in control; never move forward without explicit consent.
+- Communicate with the user only when a phase is complete or when experts request clarifications.
+- Do not dispatch placeholder or deferred instructions (e.g., “HOLD”, “wait until approval”, “queue this”). Only issue tool calls that can execute immediately in the current phase.
 
-        ### 1) Draft
-        - Action: call `transfer_to_writer`.
-        - Do not add, expand, interpret, or restructure the user’s request yourself.
-        - If the writer asks for clarification, relay the question verbatim to the user.
-        - Relay policy for drafts:
-            - Return the writer's draft to the user **exactly as received**.
-            - Place your questions/notes **outside** the fence.
+## Phases
 
-        ### 2) Review / Approval
-        - Action: call `final_answer` to share the draft exactly as received and ask: "Approve as-is, or request changes?"
-        - If changes are requested, return to **Draft**.
-        - Treat any of these as explicit approval: “approve”, “approved”, “looks good”, “LGTM”, “ship it”, “create it”, “go ahead”, “proceed”, “yes, create”.
+### 1. Draft
+- Action: call `transfer_to_writer`.
+- Do not add, expand, interpret, or restructure the user’s request yourself.
+- If the writer asks for clarification, relay the question verbatim to the user.
+- Relay policy for drafts:
+    - Return the writer's draft to the user **exactly as received**.
+    - Place your questions/notes **outside** the fence.
 
-        ### 3) Duplicate Check
-        - After approval, call `transfer_to_analyst` to search for similar issues.
-        - If duplicates found: let user decide to stop or continue.
-        - If unclear: ask user for refined search terms.
+### 2. Review / Approval
+- Action: call `final_answer` to share the draft exactly as received and ask: "Approve as-is, or request changes?"
+- If changes are requested, return to **Draft**.
+- Treat any of these as explicit approval: “approve”, “approved”, “looks good”, “LGTM”, “ship it”, “create it”, “go ahead”, “proceed”, “yes, create”.
 
-        ### 4) Create
-        - Only after explicit user confirmation, call `create_issue`.
-        - Then send brief confirmation with link/ID via `final_answer`.
+### 3. Duplicate Check
+- After approval, call `transfer_to_analyst` to search for similar issues.
+- If duplicates found: let user decide to stop or continue.
+- If unclear: ask user for refined search terms.
 
-        ## Output Rules
-        - Tone: professional, neutral, concise, and actionable.
+### 4. Create
+- Only after explicit user confirmation, call `create_issue`.
+- When creating the issue:
+    - Use the first line inside the fenced block ([Feature]: ..., [Bug]: ..., etc.) as the issue title.
+    - Remove that first line from the body so it does not appear twice.
+    - Keep the remaining markdown inside the body exactly as written (do not expand, reformat, or add text).
+- Select appropriate type from available issue types:
+{issue_types_text}
+- Then send brief confirmation with link/ID via `final_answer`.
 
-        ## Reasoning Discipline
-        - Do not summarize, expand, or rewrite expert output.
-        - Do not anticipate clarifications yourself. Relay them only if explicitly requested by an expert.
-        - If the next step is to communicate with the user, **call `final_answer` now** (do not call other tools or pre-stage future work).
+## Output Rules
+- Tone: professional, neutral, concise, and actionable.
 
-        ## Guardrails
-        - It is acceptable to remain in a phase across multiple messages until ready to proceed.
-        - Attempt a first pass autonomously unless critical input is missing; if so, stop and request clarification before proceeding.
-        """
-    )
+## Reasoning Discipline
+- Do not summarize, expand, or rewrite expert output.
+- Do not anticipate clarifications yourself. Relay them only if explicitly requested by an expert.
+- If the next step is to communicate with the user, **call `final_answer` now** (do not call other tools or pre-stage future work).
+
+## Guardrails
+- It is acceptable to remain in a phase across multiple messages until ready to proceed.
+- Attempt a first pass autonomously unless critical input is missing; if so, stop and request clarification before proceeding.
+"""
 
     # Get the specialized agents
     writer = await get_agent_writer()
@@ -99,7 +127,7 @@ async def get_agent_manager():
         target=analyst,
         name="transfer_to_analyst",
         description="Assign to Analyst for duplicate issue search.",
-        # propagate_inputs=False,
+        propagate_inputs=False,
     )
 
     template = dedent(
@@ -154,7 +182,7 @@ async def get_agent_manager():
         ],
         requirements=[
             ConditionalRequirement(SimpleThinkTool, force_at_step=1, force_after=[Tool], consecutive_allowed=False),
-            # AskPermissionRequirement(create_issue),
+            AskPermissionRequirement(create_issue),
         ],
         templates={
             "system": PromptTemplate(PromptTemplateInput(schema=RequirementAgentSystemPromptInput, template=template)),
