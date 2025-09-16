@@ -38,10 +38,12 @@ Perfect for:
 - **Template Support**: Bug report and feature request templates
 - **Documentation Grounding**: Technical Writer uses project documentation for technical accuracy
 - **GitHub Integration**: Seamless interaction through GitHub MCP server
+- **Issue Types Support**: Automatic detection and use of organization issue types with fallback to default types (Feature/Bug)
 - **Trajectory Tracking**: Real-time visibility into agent interactions and tool usage
 - **Duplicate Prevention**: Intelligent search for existing similar issues
 - **User Approval**: Human-in-the-loop workflow with approval gates
 - **Conditional Requirements**: Enforced workflow steps and dependencies
+- **Repository-Scoped Tools**: Pre-configured GitHub tools with repository context for better security
 
 ## Quickstart
 
@@ -100,25 +102,26 @@ TEMPLATE_FEATURE="your feature request template..."
 ```mermaid
 flowchart TD
     A[👤 User Input<br/>Bug/Feature Description] --> B[🎯 Project Manager<br/>Workflow Coordination]
-    
+
     B --> C[📝 Technical Writer]
     C --> D[📄 Draft Created<br/>with Templates]
     D --> E[👤 User Approval<br/>Approve/Request Changes]
-    
+
     E -->|Changes| C
     E -->|Approved| F[🔍 Analyst]
-    
+
     F --> G[🔎 Search Similar Issues<br/>via GitHub MCP]
     G --> H[📋 Duplicate Report]
     H --> I[👤 Final Confirmation]
-    
+
     I --> J[🚀 Create GitHub Issue<br/>via GitHub MCP]
-    
+
     K[📚 Templates<br/>Bug/Feature] -.-> C
     L[📖 Documentation<br/>Grounding] -.-> C
-    M[🔧 GitHub MCP Server<br/>Issues API] -.-> F
+    M[🔧 GitHub MCP Server<br/>Issues & Types API] -.-> F
     M -.-> J
-    
+    M -.-> |Issue Types<br/>Grounding| B
+
     style A fill:#e1f5fe
     style B fill:#fff3e0
     style C fill:#f3e5f5
@@ -163,7 +166,7 @@ For more information on the BeeAI Framework: https://framework.beeai.dev
 ## Roadmap
 
 - [ ] 🚧 **Improve multi-turn conversations** - Better context handling across multiple interactions
-- [ ] **Add evaluation datasets** - Comprehensive testing with real-world issue examples  
+- [ ] **Add evaluation datasets** - Comprehensive testing with real-world issue examples
 - [ ] **Improve agent configuration** - Configure GitHub repository from BeeAI Platform UI
 - [ ] **Add RAG instead of grounding** - Dynamic document retrieval for better context
 - [ ] **Add streaming support** - Real-time response streaming for better UX
@@ -171,7 +174,7 @@ For more information on the BeeAI Framework: https://framework.beeai.dev
 - [ ] **Artefact support** - Enable rich content generation and interactive editing capabilities
 - [ ] **GitHub Lables field** - Allow the agent to correctly populate the labels ([#312](https://github.com/github/github-mcp-server/issues/312))
 - [ ] **Support attachements** - Allow users to upload files (screenshots, videos)
-- [x] **GitHub Type field** - Allow the agent to correctly populate the type field
+- [x] **GitHub Issue Types Support** - Automatic detection and use of organization issue types with fallback
 - [x] **MCP direct repository configuration** - Pre-configure the MCP tool with repository settings instead of relying on LLM to pass repository name
 - [x] **Improve trajectory metadata** - Enhanced progress tracking and debugging capabilities
 - [x] **Elicitation support** - Interactive tool use approval and clarification workflows

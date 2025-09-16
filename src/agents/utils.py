@@ -1,6 +1,5 @@
 import os
-from enum import Enum
-from typing import Literal, Optional, Union
+from typing import Literal, Optional
 
 import aiohttp
 from beeai_framework.backend import ChatModel
