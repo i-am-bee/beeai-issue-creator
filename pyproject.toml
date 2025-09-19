@@ -8,12 +8,13 @@ authors = [
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11,<4.0"
 dependencies = [
-    "beeai-framework[beeai-platform]>=0.1.44",
+    "beeai-framework[beeai-platform]>=0.1.52",
     "aiohttp>=3.8.0",
     "mcp>=1.0.0",
     "python-dotenv>=1.0.0",
     "openinference-instrumentation-beeai>=0.1.10",
-    "beeai-sdk>=0.3.1"
+    "beeai-sdk>=0.3.5-rc4",
+    "pydantic>=2.11.9",
 ]
 
 [project.optional-dependencies]

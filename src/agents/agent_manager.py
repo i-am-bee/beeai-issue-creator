@@ -1,14 +1,12 @@
 import json
-import os
 from textwrap import dedent, indent
 
 from beeai_framework.agents.experimental import RequirementAgent
 from beeai_framework.agents.experimental.prompts import (
     RequirementAgentSystemPromptInput,
-    RequirementAgentTaskPromptInput,
 )
-from beeai_framework.agents.experimental.requirements.ask_permission import AskPermissionRequirement
 from beeai_framework.agents.experimental.requirements.conditional import ConditionalRequirement
+from beeai_framework.memory import BaseMemory
 from beeai_framework.middleware.trajectory import GlobalTrajectoryMiddleware
 from beeai_framework.template import PromptTemplate, PromptTemplateInput
 from beeai_framework.tools import Tool
@@ -16,13 +14,14 @@ from beeai_framework.tools.handoff import HandoffTool
 
 from agents.agent_analyst import get_agent_analyst
 from agents.agent_writer import get_agent_writer
+from agents.session_context import SessionContext
 from agents.simple_think import SimpleThinkTool
-from agents.utils import ToolNotFoundError, create_repo_scoped_tool, get_tools_by_names, llm, session_manager
+from agents.utils import ToolNotFoundError, create_repo_scoped_tool, get_tools_by_names
 
 
-async def get_agent_manager():
+async def get_agent_manager(session_context: SessionContext, memory: BaseMemory):
     """Create and configure the issue workflow management agent."""
-    tools = await session_manager.get_tools()
+    tools = await session_context.get_tools()
 
     try:
         tools = await get_tools_by_names(tools, ["create_issue", "list_issue_types"])
@@ -32,9 +31,9 @@ async def get_agent_manager():
 
         for tool in tools:
             if tool.name == "create_issue":
-                create_issue = await create_repo_scoped_tool(tool)
+                create_issue = await create_repo_scoped_tool(tool, session_context.get_repository())
             elif tool.name == "list_issue_types":
-                list_issue_types = await create_repo_scoped_tool(tool)
+                list_issue_types = await create_repo_scoped_tool(tool, session_context.get_repository())
 
     except ToolNotFoundError as e:
         raise RuntimeError(f"Failed to configure the agent: {e}") from e
@@ -55,13 +54,11 @@ async def get_agent_manager():
     issue_types_lines = [f"- {issue_type['name']}: {issue_type['description']}" for issue_type in issue_types_data]
     issue_types_text = indent("\n".join(issue_types_lines), "    ")
 
-    repository = os.getenv("GITHUB_REPOSITORY")
-
     role = "helpful coordinator"
     instruction = f"""\
 As the Coordinator, your responsibilities include routing tasks to experts, managing processes sequentially, and handling all user-facing communication. You do not perform technical writing or reasoning yourself.
 
-You work in the following repository: {repository}
+You work in the following repository: {session_context.get_repository()}
 
 ## Operating Principles
 - Manage the full lifecycle of a GitHub issue from user request to creation.
@@ -113,8 +110,8 @@ You work in the following repository: {repository}
 """
 
     # Get the specialized agents
-    writer = await get_agent_writer()
-    analyst = await get_agent_analyst()
+    writer = await get_agent_writer(session_context)
+    analyst = await get_agent_analyst(session_context)
 
     handoff_writer = HandoffTool(
         target=writer,
@@ -171,8 +168,9 @@ You work in the following repository: {repository}
 
     return RequirementAgent(
         name="Project Manager",
-        llm=llm,
+        llm=session_context.get_llm(),
         role=role,
+        memory=memory,
         instructions=instruction,
         tools=[
             SimpleThinkTool(),
@@ -182,7 +180,7 @@ You work in the following repository: {repository}
         ],
         requirements=[
             ConditionalRequirement(SimpleThinkTool, force_at_step=1, force_after=[Tool], consecutive_allowed=False),
-            AskPermissionRequirement(create_issue),
+            # AskPermissionRequirement(create_issue),
         ],
         templates={
             "system": PromptTemplate(PromptTemplateInput(schema=RequirementAgentSystemPromptInput, template=template)),
