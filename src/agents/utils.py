@@ -2,7 +2,7 @@ import os
 from typing import Literal, Optional
 
 import aiohttp
-from beeai_framework.backend import ChatModel
+from beeai_framework.adapters.beeai_platform.backend.chat import BeeAIPlatformChatModel
 from beeai_framework.tools import Tool, tool
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -12,7 +12,7 @@ from agents.session_manager import SessionManager
 load_dotenv()
 
 model = os.getenv("MODEL", "openai:gpt-5-mini")
-llm = ChatModel.from_name(model, {"api_key": os.getenv("API_KEY")})
+llm=BeeAIPlatformChatModel(preferred_models=["openai/gpt-5-mini"])
 
 # Shared singleton instance
 session_manager = SessionManager()
