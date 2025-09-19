@@ -3,7 +3,8 @@ import os
 from beeai_framework.agents.tool_calling import ToolCallingAgent
 from beeai_framework.agents.tool_calling.prompts import ToolCallingAgentSystemPrompt, ToolCallingAgentTaskPrompt
 
-from agents.utils import fetch_content, llm
+from agents.session_context import SessionContext
+from agents.utils import fetch_content
 
 
 async def get_template(template_type: str) -> str:
@@ -41,7 +42,7 @@ def _strip_yaml_frontmatter(content: str) -> str:
     return content
 
 
-async def get_agent_writer():
+async def get_agent_writer(session_context: SessionContext):
     """Create and configure the technical issue writing agent."""
     # Get documentation content from environment variable
     docs_url = os.getenv("DOCS_URL")
@@ -143,7 +144,7 @@ You are the Technical Writer for GitHub issues. Your only task is to draft clear
 
 """
 
-    clonedLlm = await llm.clone()
+    clonedLlm = await session_context.get_llm().clone()
     clonedLlm.emitter.on("start", lambda data, event: data.input.tools.pop(0))  # removes the final answer tool
 
     return ToolCallingAgent(
