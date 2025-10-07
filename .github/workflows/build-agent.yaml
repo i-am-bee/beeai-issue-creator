@@ -48,4 +48,4 @@ jobs:
 
     - name: Build and Push
       run: |
-        beeai build ./ --tag ghcr.io/${{ github.repository }}/my-agent:${{ steps.extract_version.outputs.version }} --no-import --multi-platform --push
+        beeai build ./ --tag ghcr.io/${{ github.repository }}/beeai-issue-creator:${{ steps.extract_version.outputs.version }} --no-import --multi-platform --push

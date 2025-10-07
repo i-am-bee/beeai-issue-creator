@@ -6,6 +6,8 @@ from typing import Annotated
 from beeai_framework.backend import AssistantMessage, UserMessage
 from beeai_framework.memory.unconstrained_memory import UnconstrainedMemory
 from beeai_sdk.a2a.extensions import (
+    AgentDetailContributor,
+    AgentDetailTool,
     LLMServiceExtensionServer,
     LLMServiceExtensionSpec,
     SecretDemand,
@@ -65,6 +67,7 @@ async def extract_github_pat_secret(secrets: SecretsExtensionServer) -> str:
     else:
         return secrets.data.secret_fulfillments["default"].secret
 
+
 def get_memory(context: RunContext) -> UnconstrainedMemory:
     """Get or create session memory"""
     context_id = getattr(context, "context_id", getattr(context, "session_id", "default"))
@@ -76,34 +79,25 @@ def get_memory(context: RunContext) -> UnconstrainedMemory:
     description=dedent(
         """\
         Creates well-structured, actionable GitHub issues from user descriptions of bugs or feature requests.
+        
         Uses project documentation and templates to ensure consistency and completeness.
         """
     ),
     detail=AgentDetail(
         default_input_modes=["text"],
         default_output_modes=["text"],
-        detail=AgentDetail(
-            interaction_mode="multi-turn",
-            framework="BeeAI",
-        ),
+        interaction_mode="multi-turn",
+        framework="BeeAI",
+        author=AgentDetailContributor(name="Matous Havlena", email="havlenam@ibm.com"),
+        tools=[AgentDetailTool(name="Github", description="Github integration allows to browse and create issues in the repository.")],
+        source_code_url="https://github.com/i-am-bee/beeai-issue-creator",
+        container_image_url="ghcr.io/i-am-bee/beeai-issue-creator/beeai-issue-creator",
         skills=[
             AgentSkill(
                 id="create_github_issue",
                 name="Create GitHub Issue",
-                description=dedent(
-                    """\
-                Creates well-structured, actionable GitHub issues from user descriptions of bugs or feature requests.
-                Uses project documentation and templates to ensure consistency and completeness.
-                """
-                ),
+                description="Create a GitHub issue",
                 tags=["GitHub", "Issues", "Bug Reports", "Feature Requests", "Documentation"],
-                examples=[
-                    "The login form crashes when I enter special characters in the password field",
-                    "Add support for dark mode theme in the user interface",
-                    "API returns 500 error when making concurrent requests to /users endpoint",
-                    "Implement user authentication with OAuth2 integration",
-                    "Memory leak occurs after running the application for several hours",
-                ],
             )
         ],
     ),
@@ -174,7 +168,6 @@ async def github_issue_creator(
         return
     except Exception:
         pass
-
 
     parsed_form_data = forms[context.context_id]
     if not parsed_form_data:
