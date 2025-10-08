@@ -3,7 +3,7 @@ import os
 from textwrap import dedent
 from typing import Annotated
 
-from beeai_framework.backend import AssistantMessage, UserMessage
+from beeai_framework.backend import AssistantMessage
 from beeai_framework.memory.unconstrained_memory import UnconstrainedMemory
 from beeai_sdk.a2a.extensions import (
     AgentDetailContributor,
@@ -15,6 +15,7 @@ from beeai_sdk.a2a.extensions import (
 )
 from beeai_sdk.a2a.extensions.auth.secrets import SecretsExtensionServer, SecretsServiceExtensionParams
 from beeai_sdk.a2a.extensions.ui.form import FormExtensionServer, FormExtensionSpec, FormRender, TextField
+from beeai_sdk.a2a.types import AgentMessage
 from beeai_sdk.server import Server
 from a2a.utils.message import get_message_text
 
@@ -28,7 +29,7 @@ import pydantic
 
 from agents.agent_manager import get_agent_manager
 from agents.session_context import SessionContext
-from agents.utils import stream_text_with_delay
+from agents.utils import to_framework_message
 
 BeeAIInstrumentor().instrument()
 
@@ -45,7 +46,6 @@ class InputFormModel(pydantic.BaseModel):
 
 server = Server()
 
-memories = {}
 forms: dict[str, InputFormModel] = {}
 
 
@@ -54,25 +54,19 @@ async def extract_github_pat_secret(secrets: SecretsExtensionServer) -> str:
         secrets is None
         or secrets.data is None
         or secrets.data.secret_fulfillments is None
-        or secrets.data.secret_fulfillments.get("default") is None
+        or secrets.data.secret_fulfillments.get("github") is None
     ):
         dynamic_secrets = await secrets.request_secrets(
             params=SecretsServiceExtensionParams(
-                secret_demands={"default": SecretDemand(description="Github Personal Access Token", name="Github PAT")}
+                secret_demands={"github": SecretDemand(description="Github Personal Access Token", name="Github PAT")}
             )
         )
         if dynamic_secrets is None:
             raise ValueError("No Github Personal Access Token found")
 
-        return dynamic_secrets.secret_fulfillments["default"].secret
+        return dynamic_secrets.secret_fulfillments["github"].secret
     else:
-        return secrets.data.secret_fulfillments["default"].secret
-
-
-def get_memory(context: RunContext) -> UnconstrainedMemory:
-    """Get or create session memory"""
-    context_id = getattr(context, "context_id", getattr(context, "session_id", "default"))
-    return memories.setdefault(context_id, UnconstrainedMemory())
+        return secrets.data.secret_fulfillments["github"].secret
 
 
 @server.agent(
@@ -90,7 +84,11 @@ def get_memory(context: RunContext) -> UnconstrainedMemory:
         interaction_mode="multi-turn",
         framework="BeeAI",
         author=AgentDetailContributor(name="Matous Havlena", email="havlenam@ibm.com"),
-        tools=[AgentDetailTool(name="Github", description="Github integration allows to browse and create issues in the repository.")],
+        tools=[
+            AgentDetailTool(
+                name="Github", description="Github integration allows to browse and create issues in the repository."
+            )
+        ],
         source_code_url="https://github.com/i-am-bee/beeai-issue-creator",
         container_image_url="ghcr.io/i-am-bee/beeai-issue-creator/beeai-issue-creator",
         skills=[
@@ -106,10 +104,17 @@ def get_memory(context: RunContext) -> UnconstrainedMemory:
 async def github_issue_creator(
     input: Message,
     context: RunContext,
-    llm: Annotated[LLMServiceExtensionServer, LLMServiceExtensionSpec.single_demand()],
+    llm: Annotated[
+        LLMServiceExtensionServer,
+        LLMServiceExtensionSpec.single_demand(suggested=("openai:gpt-5-nano", "rits:meta-llama/llama4-maverick-17b-128e-instruct-fp8")),
+    ],
     secrets: Annotated[
         SecretsExtensionServer,
-        SecretsExtensionSpec.single_demand(name="Github", description="Github Personal Access Token"),
+        SecretsExtensionSpec(
+            params=SecretsServiceExtensionParams(
+                secret_demands={"github": SecretDemand(description="Github Personal Access Token", name="Github PAT")}
+            )
+        ),
     ],
     form: Annotated[
         FormExtensionServer,
@@ -151,6 +156,12 @@ async def github_issue_creator(
         ),
     ],
 ):
+    await context.store(input)
+    history = [message async for message in context.load_history() if isinstance(message, Message) and message.parts]
+    new_messages = [to_framework_message(item) for item in history]
+    memory = UnconstrainedMemory()
+    await memory.add_many(new_messages)
+
     github_pat = await extract_github_pat_secret(secrets)
 
     try:
@@ -165,8 +176,12 @@ async def github_issue_creator(
             }
         )
 
-        async for token in stream_text_with_delay("Great! Let's get started. Can you provide me with the details of the issue you want to report?"):
-            yield token
+        msg = AgentMessage(
+            text="Great! Let's get started. Can you provide me with the details of the issue you want to report?"
+        )
+        await context.store(msg)
+        yield msg
+
         return
     except Exception:
         pass
@@ -176,8 +191,6 @@ async def github_issue_creator(
         raise ValueError("No form data found")
 
     text_input = get_message_text(input)
-    memory = get_memory(context)
-    await memory.add(UserMessage(text_input))
 
     llm_config = llm.data.llm_fulfillments.get("default")
     if not llm_config:
@@ -205,8 +218,10 @@ async def github_issue_creator(
             if tool_name == "final_answer":
                 response_text = step.input["response"]
                 await memory.add(AssistantMessage(response_text))
-                async for token in stream_text_with_delay(response_text):
-                    yield token
+
+                msg = AgentMessage(text=response_text)
+                await context.store(msg)
+                yield msg
 
 
 def run():
