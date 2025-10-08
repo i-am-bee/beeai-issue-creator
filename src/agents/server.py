@@ -81,7 +81,7 @@ async def extract_github_pat_secret(secrets: SecretsExtensionServer) -> str:
         default_output_modes=["text"],
         interaction_mode="multi-turn",
         framework="BeeAI",
-        author=AgentDetailContributor(name="Matous Havlena", email="havlenam@ibm.com"),
+        author=AgentDetailContributor(name="Matous Havlena", email="matous.havlena@ibm.com"),
         tools=[
             AgentDetailTool(
                 name="Github", description="Github integration allows to browse and create issues in the repository."
