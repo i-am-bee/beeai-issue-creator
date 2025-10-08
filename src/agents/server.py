@@ -46,8 +46,6 @@ class InputFormModel(pydantic.BaseModel):
 
 server = Server()
 
-forms: dict[str, InputFormModel] = {}
-
 
 async def extract_github_pat_secret(secrets: SecretsExtensionServer) -> str:
     if (
@@ -157,37 +155,30 @@ async def github_issue_creator(
     ],
 ):
     await context.store(input)
-    history = [message async for message in context.load_history() if isinstance(message, Message) and message.parts]
+    history = [message async for message in context.load_history()]
     new_messages = [to_framework_message(item) for item in history]
     memory = UnconstrainedMemory()
     await memory.add_many(new_messages)
 
     github_pat = await extract_github_pat_secret(secrets)
 
-    try:
-        parsed_form_data = form.parse_form_response(message=input)
+    parsed_form_data = None
+    for message in history:
+        try:
+            form_response = form.parse_form_response(message=message)
+            parsed_form_data = InputFormModel.model_validate(
+                {
+                    "repo": form_response.values["repo"].value,
+                    "docs_url": form_response.values["docs_url"].value,
+                    "bug_template_url": form_response.values["bug_template_url"].value,
+                    "feature_template_url": form_response.values["feature_template_url"].value,
+                }
+            )
+            break
+        except Exception:
+            continue
 
-        forms[context.context_id] = InputFormModel.model_validate(
-            {
-                "repo": parsed_form_data.values["repo"].value,
-                "docs_url": parsed_form_data.values["docs_url"].value,
-                "bug_template_url": parsed_form_data.values["bug_template_url"].value,
-                "feature_template_url": parsed_form_data.values["feature_template_url"].value,
-            }
-        )
-
-        msg = AgentMessage(
-            text="Great! Let's get started. Can you provide me with the details of the issue you want to report?"
-        )
-        await context.store(msg)
-        yield msg
-
-        return
-    except Exception:
-        pass
-
-    parsed_form_data = forms[context.context_id]
-    if not parsed_form_data:
+    if parsed_form_data is None:
         raise ValueError("No form data found")
 
     text_input = get_message_text(input)
