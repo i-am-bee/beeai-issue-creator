@@ -28,6 +28,7 @@ import pydantic
 
 from agents.agent_manager import get_agent_manager
 from agents.session_context import SessionContext
+from agents.utils import stream_text_with_delay
 
 BeeAIInstrumentor().instrument()
 
@@ -164,7 +165,8 @@ async def github_issue_creator(
             }
         )
 
-        yield "Lets provide the prompt now."
+        async for token in stream_text_with_delay("Great! Let's get started. Can you provide me with the details of the issue you want to report?"):
+            yield token
         return
     except Exception:
         pass
@@ -203,7 +205,8 @@ async def github_issue_creator(
             if tool_name == "final_answer":
                 response_text = step.input["response"]
                 await memory.add(AssistantMessage(response_text))
-                yield response_text
+                async for token in stream_text_with_delay(response_text):
+                    yield token
 
 
 def run():

@@ -40,7 +40,7 @@ class SessionContext:
     
     def get_llm(self) -> LLMFulfillment:
         with contextlib.suppress(Exception):
-            target_provider: type[ChatModel] = load_model(self._llm_fulfillment.api_model.replace("beeai:", ""), "chat")
+            target_provider: type[ChatModel] = load_model(self._llm_fulfillment.api_model.replace("beeai:", "").replace("rits:", "ollama:"), "chat")
             tool_choice_support = target_provider.tool_choice_support.copy()
 
         return OpenAIChatModel(

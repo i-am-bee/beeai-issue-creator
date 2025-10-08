@@ -1,3 +1,5 @@
+import asyncio
+from random import random
 from typing import Literal, Optional
 
 import aiohttp
@@ -162,3 +164,13 @@ async def create_repo_scoped_tool(original_tool: Tool, github_repository: str) -
     wrapper_tool.name = original_tool.name
 
     return wrapper_tool
+
+async def stream_text_with_delay(text: str, min_delay: float = 0.01, max_delay: float = 0.05):
+    """Stream text with random delays between tokens to simulate typing"""
+    import re
+    tokens = re.findall(r'\S+|\s+', text)
+    
+    for token in tokens:
+        yield token
+        delay = random.uniform(min_delay, max_delay)
+        await asyncio.sleep(delay)
