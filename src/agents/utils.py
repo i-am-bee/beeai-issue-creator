@@ -1,8 +1,9 @@
-import asyncio
-from random import random
 from typing import Literal, Optional
 
+from a2a.types import Message, Role
 import aiohttp
+from beeai_framework.backend import AssistantMessage
+from beeai_framework.backend.message import UserMessage
 from beeai_framework.tools import Tool, tool
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -158,12 +159,12 @@ async def create_repo_scoped_tool(original_tool: Tool, github_repository: str) -
 
     return wrapper_tool
 
-async def stream_text_with_delay(text: str, min_delay: float = 0.01, max_delay: float = 0.05):
-    """Stream text with random delays between tokens to simulate typing"""
-    import re
-    tokens = re.findall(r'\S+|\s+', text)
-    
-    for token in tokens:
-        yield token
-        delay = random.uniform(min_delay, max_delay)
-        await asyncio.sleep(delay)
+
+def to_framework_message(message: Message) -> UserMessage | AssistantMessage:
+    message_text = "".join(part.root.text for part in message.parts if part.root.kind == "text")
+
+    match message.role:
+        case Role.agent:
+            return AssistantMessage(message_text)
+        case Role.user:
+            return UserMessage(message_text)
