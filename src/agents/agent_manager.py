@@ -25,16 +25,19 @@ async def get_agent_manager():
     tools = await session_manager.get_tools()
 
     try:
-        tools = await get_tools_by_names(tools, ["create_issue", "list_issue_types"])
+        tools = await get_tools_by_names(tools, ["create_issue", "list_issue_types", "list_label"])
 
         create_issue = None
         list_issue_types = None
+        list_label = None
 
         for tool in tools:
             if tool.name == "create_issue":
                 create_issue = await create_repo_scoped_tool(tool)
             elif tool.name == "list_issue_types":
                 list_issue_types = await create_repo_scoped_tool(tool)
+            elif tool.name == "list_label":
+                list_label = await create_repo_scoped_tool(tool)
 
     except ToolNotFoundError as e:
         raise RuntimeError(f"Failed to configure the agent: {e}") from e
@@ -54,6 +57,27 @@ async def get_agent_manager():
 
     issue_types_lines = [f"- {issue_type['name']}: {issue_type['description']}" for issue_type in issue_types_data]
     issue_types_text = indent("\n".join(issue_types_lines), "    ")
+
+    # Get labels with fallback
+    fallback_labels = []
+
+    try:
+        response = await list_label.run(input={})
+        # Parse nested response structure
+        response_data = json.loads(response.get_text_content())
+        # Extract text from first content block
+        text_content = response_data[0]["text"]
+        # Parse the JSON string inside
+        labels_response = json.loads(text_content)
+        # Extract labels array
+        labels_data = labels_response["labels"]
+    except Exception:
+        # Fallback to empty list on any error (including 404, parsing errors)
+        labels_data = fallback_labels
+
+    # Extract only name and description from each label
+    labels_lines = [f"- {label['name']}: {label.get('description', '')}" for label in labels_data]
+    labels_text = indent("\n".join(labels_lines), "    ")
 
     repository = os.getenv("GITHUB_REPOSITORY")
 
@@ -97,6 +121,8 @@ You work in the following repository: {repository}
     - Keep the remaining markdown inside the body exactly as written (do not expand, reformat, or add text).
 - Select appropriate type from available issue types:
 {issue_types_text}
+- Select appropriate labels from available labels:
+{labels_text}
 - Then send brief confirmation with link/ID via `final_answer`.
 
 ## Output Rules

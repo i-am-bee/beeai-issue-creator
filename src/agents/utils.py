@@ -143,6 +143,12 @@ async def create_repo_scoped_tool(original_tool: Tool) -> Tool:
             pass
 
         input_schema = ListIssueTypesInput
+    elif original_tool.name == "list_label":
+
+        class ListLabelInput(BaseModel):
+            pass
+
+        input_schema = ListLabelInput
     else:
         # Fallback: use the original tool without wrapping
         return original_tool

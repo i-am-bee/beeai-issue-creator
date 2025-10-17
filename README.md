@@ -1,5 +1,13 @@
 # BeeAI Issue Creator
 
+<div align="center">
+
+[![Gitingest](https://img.shields.io/badge/Gitingest-blue?logo=github)](https://gitingest.com/i-am-bee/beeai-issue-creator)
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-blue?logo=wikipedia)](https://deepwiki.com/i-am-bee/beeai-issue-creator)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
+</div>
+
 > [!WARNING]
 > This project is in early beta stage. Expect bugs and breaking changes.
 
@@ -166,15 +174,17 @@ For more information on the BeeAI Framework: https://framework.beeai.dev
 ## Roadmap
 
 - [ ] 🚧 **Improve multi-turn conversations** - Better context handling across multiple interactions
+- [ ] **Pass artifacts by reference** - Reference artifacts in conversation history instead of including full content
+- [ ] **Treat issues as artifacts** - Return issue drafts as artifacts in A2A protocol instead of messages
 - [ ] **Add evaluation datasets** - Comprehensive testing with real-world issue examples
 - [ ] **Improve agent configuration** - Configure GitHub repository from BeeAI Platform UI
 - [ ] **Add RAG instead of grounding** - Dynamic document retrieval for better context
 - [ ] **Add streaming support** - Real-time response streaming for better UX
 - [ ] **Build as Docker image** - Containerized deployment for easier hosting
-- [ ] **Artefact support** - Enable rich content generation and interactive editing capabilities
-- [ ] **GitHub Lables field** - Allow the agent to correctly populate the labels ([#312](https://github.com/github/github-mcp-server/issues/312))
+- [ ] **Artifact support** - Enable rich content generation and interactive editing capabilities
+- [x] **GitHub Labels field** - Allow the agent to correctly populate the labels ([#312](https://github.com/github/github-mcp-server/issues/312))
 - [ ] **Support attachements** - Allow users to upload files (screenshots, videos)
-- [x] **GitHub Issue Types Support** - Automatic detection and use of organization issue types with fallback
+- [ ] 🚧 **GitHub Issue Types Support** - Automatic detection and use of organization issue types with fallback
 - [x] **MCP direct repository configuration** - Pre-configure the MCP tool with repository settings instead of relying on LLM to pass repository name
 - [x] **Improve trajectory metadata** - Enhanced progress tracking and debugging capabilities
 - [x] **Elicitation support** - Interactive tool use approval and clarification workflows
