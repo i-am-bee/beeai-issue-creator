@@ -47,6 +47,7 @@ Perfect for:
 - **Documentation Grounding**: Technical Writer uses project documentation for technical accuracy
 - **GitHub Integration**: Seamless interaction through GitHub MCP server
 - **Issue Types Support**: Automatic detection and use of organization issue types with fallback to default types (Feature/Bug)
+- **Labels Support**: Automatic retrieval and application of repository labels to created issues
 - **Trajectory Tracking**: Real-time visibility into agent interactions and tool usage
 - **Duplicate Prevention**: Intelligent search for existing similar issues
 - **User Approval**: Human-in-the-loop workflow with approval gates
@@ -126,9 +127,9 @@ flowchart TD
 
     K[📚 Templates<br/>Bug/Feature] -.-> C
     L[📖 Documentation<br/>Grounding] -.-> C
-    M[🔧 GitHub MCP Server<br/>Issues & Types API] -.-> F
+    M[🔧 GitHub MCP Server<br/>Issues, Types & Labels API] -.-> F
     M -.-> J
-    M -.-> |Issue Types<br/>Grounding| B
+    M -.-> |Issue Types & Labels<br/>Grounding| B
 
     style A fill:#e1f5fe
     style B fill:#fff3e0

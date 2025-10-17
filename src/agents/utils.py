@@ -131,7 +131,7 @@ async def create_repo_scoped_tool(original_tool: Tool) -> Tool:
         class CreateIssueInput(BaseModel):
             title: str  # Required
             body: Optional[str] = None  # Optional
-            # labels: Optional[list[str]] = None  # Optional
+            labels: Optional[list[str]] = None  # Optional
             # assignees: Optional[list[str]] = None  # Optional
             # milestone: Optional[int] = None  # Optional
             type: Optional[str] = None  # Optional
