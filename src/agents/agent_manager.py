@@ -16,6 +16,8 @@ from beeai_framework.tools.handoff import HandoffTool
 
 from agents.agent_analyst import get_agent_analyst
 from agents.agent_writer import get_agent_writer
+from agents.artifact_handoff import ArtifactHandoffTool, ArtifactStore
+from agents.artifact_middleware import ArtifactMiddleware
 from agents.simple_think import SimpleThinkTool
 from agents.utils import ToolNotFoundError, create_repo_scoped_tool, get_tools_by_names, llm, session_manager
 
@@ -91,7 +93,14 @@ You work in the following repository: {repository}
 - Manage the full lifecycle of a GitHub issue from user request to creation.
 - Keep the user in control; never move forward without explicit consent.
 - Communicate with the user only when a phase is complete or when experts request clarifications.
-- Do not dispatch placeholder or deferred instructions (e.g., “HOLD”, “wait until approval”, “queue this”). Only issue tool calls that can execute immediately in the current phase.
+- Do not dispatch placeholder or deferred instructions (e.g., "HOLD", "wait until approval", "queue this"). Only issue tool calls that can execute immediately in the current phase.
+
+## Working with Artifacts
+- Experts may return artifact references like `<artifact id="draft_k3x9" />` containing large content (drafts, etc.).
+- Artifacts are **immutable**—they cannot be modified, only replaced by creating a new one.
+- To show the full content to the user: include the artifact tag in your `final_answer` (it will auto-expand).
+- To request changes: pass the artifact tag back to an expert along with change instructions (they see the full content and create a new artifact).
+- Never create artifact tags yourself—only use what experts return.
 
 ## Phases
 
@@ -138,22 +147,30 @@ You work in the following repository: {repository}
 - Attempt a first pass autonomously unless critical input is missing; if so, stop and request clarification before proceeding.
 """
 
+    # Create shared artifact store
+    artifact_store = ArtifactStore()
+
     # Get the specialized agents
     writer = await get_agent_writer()
     analyst = await get_agent_analyst()
 
-    handoff_writer = HandoffTool(
+    # Use artifact handoff for writer (drafts can be large)
+    handoff_writer = ArtifactHandoffTool(
         target=writer,
+        artifact_store=artifact_store,
         name="transfer_to_writer",
         description="Assign to Technical Writer for drafting.",
         propagate_inputs=False,
     )
 
-    handoff_analyst = HandoffTool(
+    # Analyst needs full draft to search for duplicates
+    handoff_analyst = ArtifactHandoffTool(
         target=analyst,
+        artifact_store=artifact_store,
         name="transfer_to_analyst",
         description="Assign to Analyst for duplicate issue search.",
         propagate_inputs=False,
+        reveal_policy="full",  # Analyst sees full draft content
     )
 
     template = dedent(
@@ -215,5 +232,8 @@ You work in the following repository: {repository}
             # "task": PromptTemplate(PromptTemplateInput(schema=RequirementAgentTaskPromptInput, template="{{prompt}}")),
         },
         save_intermediate_steps=False,
-        middlewares=[GlobalTrajectoryMiddleware(included=[Tool])],
+        middlewares=[
+            ArtifactMiddleware(artifact_store),
+            GlobalTrajectoryMiddleware(included=[Tool]),
+        ],
     )

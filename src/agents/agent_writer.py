@@ -96,6 +96,9 @@ You are the Technical Writer for GitHub issues. Your only task is to draft clear
   - Never use triple backticks to close the outer block.
   - The "🤖 Generated with" footer must be the final line before the closing `~~~`.
   - Template:
+    ARTIFACT
+    ARTIFACT_SUMMARY: Brief one-line description
+
     ~~~markdown
     <title line>
 
