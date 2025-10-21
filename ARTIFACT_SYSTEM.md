@@ -2,7 +2,15 @@
 
 ## Overview
 
-The artifact system allows agents to store large content (like issue drafts) in a key-value store and pass lightweight references instead of full content in conversation history. This keeps the orchestrator agent's context clean while still allowing specialized agents to access full content when needed.
+The artifact system allows agents to store large content (like issue drafts, code, schemas) in a key-value store and pass lightweight references instead of full content in conversation history.
+
+**How it works:**
+When an agent generates substantial content (code, schemas, etc.), it uses a special format (`ARTIFACT\nSUMMARY: ...\n{content}`). This gets auto-parsed, stored with a UUID, and replaced in history with a lightweight reference like `<artifact id="uuid" summary="..." />`. The `reveal_policy` controls what downstream agents see: "none" shows just the ID, "summary" includes the description, and "full" expands references back to actual content. This way, the orchestrating agent never loads large artifacts into its context, but specialized agents can still access the full data when needed.
+
+**Value proposition:**
+- Avoids context pollution by storing large artifacts outside the main conversation history
+- Reference-based approach is memory efficient
+- Selective reveal mechanism gives fine-grained control over what each agent sees
 
 ## Architecture Diagram
 
@@ -20,12 +28,11 @@ The artifact system allows agents to store large content (like issue drafts) in 
     │                │                    │                    │
     │ Generates:     │                    │ Sees full content: │
     │ ARTIFACT       │                    │ ~~~markdown        │
-    │ ARTIFACT_      │                    │ [Feature]: ...     │
-    │  SUMMARY: ...  │                    │ ...                │
-    │                │                    │ ~~~                │
-    │ ~~~markdown    │                    │                    │
-    │ [Feature]: ... │                    └──────────┬─────────┘
-    │ ...            │                               │
+    │ SUMMARY: ...   │                    │ [Feature]: ...     │
+    │                │                    │ ...                │
+    │ ~~~markdown    │                    │ ~~~                │
+    │ [Feature]: ... │                    │                    │
+    │ ...            │                    └──────────┬─────────┘
     │ ~~~            │                               │
     └────────┬───────┘                               │
              │                                       │
@@ -70,7 +77,7 @@ Enhanced handoff tool that automatically detects and stores artifacts from agent
 - Agent generates content in special format:
   ```
   ARTIFACT
-  ARTIFACT_SUMMARY: Brief description
+  SUMMARY: Brief description
 
   {large content here}
   ```
@@ -78,8 +85,10 @@ Enhanced handoff tool that automatically detects and stores artifacts from agent
 - Returns lightweight reference: `<artifact id="draft_k3x9" summary="Brief description" />`
 
 **Reveal Policy:**
-- `"summary"` (default): Target agent sees artifact references as-is
-- `"full"`: Target agent sees full expanded content
+Controls what downstream agents see when receiving artifact references:
+- `"none"`: Shows only the artifact ID (`<artifact id="draft_k3x9" />`)
+- `"summary"` (default): Shows ID and summary (`<artifact id="draft_k3x9" summary="..." />`)
+- `"full"`: Expands the reference to show the full artifact content
 
 ### 3. ArtifactMiddleware (`artifact_middleware.py`)
 **STATUS: INCOMPLETE**
@@ -119,7 +128,7 @@ handoff_analyst = ArtifactHandoffTool(
 Writer agent instructed to output:
 ```
 ARTIFACT
-ARTIFACT_SUMMARY: Brief one-line description
+SUMMARY: Brief one-line description
 
 ~~~markdown
 {draft content}
