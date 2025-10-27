@@ -48,8 +48,8 @@ class ArtifactStore:
 
 
 class HandoffSchema(BaseModel):
-    task: str = Field(description="Clearly defined task for the agent to work on based on his abilities.")
-
+    # task: str = Field(description="Clearly defined task for the agent to work on based on his abilities.")
+    pass
 
 class ArtifactHandoffTool(Tool[HandoffSchema, ToolRunOptions, StringToolOutput]):
     """Delegates a task to an expert agent with artifact management support"""

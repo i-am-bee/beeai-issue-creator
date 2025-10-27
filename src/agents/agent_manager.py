@@ -27,15 +27,15 @@ async def get_agent_manager():
     tools = await session_manager.get_tools()
 
     try:
-        tools = await get_tools_by_names(tools, ["create_issue", "list_issue_types", "list_label"])
+        tools = await get_tools_by_names(tools, ["issue_write", "list_issue_types", "list_label"])
 
-        create_issue = None
+        issue_write = None
         list_issue_types = None
         list_label = None
 
         for tool in tools:
-            if tool.name == "create_issue":
-                create_issue = await create_repo_scoped_tool(tool)
+            if tool.name == "issue_write":
+                issue_write = await create_repo_scoped_tool(tool)
             elif tool.name == "list_issue_types":
                 list_issue_types = await create_repo_scoped_tool(tool)
             elif tool.name == "list_label":
@@ -123,7 +123,7 @@ You work in the following repository: {repository}
 - If unclear: ask user for refined search terms.
 
 ### 4. Create
-- Only after explicit user confirmation, call `create_issue`.
+- Only after explicit user confirmation, call `issue_write`.
 - When creating the issue:
     - Use the first line inside the fenced block ([Feature]: ..., [Bug]: ..., etc.) as the issue title.
     - Remove that first line from the body so it does not appear twice.
@@ -221,15 +221,15 @@ You work in the following repository: {repository}
             SimpleThinkTool(),
             handoff_writer,
             handoff_analyst,
-            create_issue,
+            issue_write,
         ],
         requirements=[
             ConditionalRequirement(SimpleThinkTool, force_at_step=1, force_after=[Tool], consecutive_allowed=False),
-            AskPermissionRequirement(create_issue),
+            AskPermissionRequirement(issue_write),
         ],
         templates={
             "system": PromptTemplate(PromptTemplateInput(schema=RequirementAgentSystemPromptInput, template=template)),
-            # "task": PromptTemplate(PromptTemplateInput(schema=RequirementAgentTaskPromptInput, template="{{prompt}}")),
+            "task": PromptTemplate(PromptTemplateInput(schema=RequirementAgentTaskPromptInput, template="{{prompt}}")),
         },
         save_intermediate_steps=False,
         middlewares=[

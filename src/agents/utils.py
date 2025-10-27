@@ -120,23 +120,24 @@ async def create_repo_scoped_tool(original_tool: Tool) -> Tool:
             after: Optional[str] = None  # Optional cursor for pagination
 
         input_schema = ListIssuesInput
-    elif original_tool.name == "get_issue":
+    elif original_tool.name == "issue_read":
 
-        class GetIssueInput(BaseModel):
+        class IssueReadInput(BaseModel):
+            method: Literal["get", "get_comments", "get_labels", "get_sub_issues"]  # Required
             issue_number: int  # Required
 
-        input_schema = GetIssueInput
-    elif original_tool.name == "create_issue":
+        input_schema = IssueReadInput
+    elif original_tool.name == "issue_write":
 
-        class CreateIssueInput(BaseModel):
-            title: str  # Required
+        class IssueWriteInput(BaseModel):
+            method: Literal["create", "update"]  # Required
+            issue_number: Optional[int] = None  # Required for update, not for create
+            title: Optional[str] = None  # Required for create
             body: Optional[str] = None  # Optional
             labels: Optional[list[str]] = None  # Optional
-            # assignees: Optional[list[str]] = None  # Optional
-            # milestone: Optional[int] = None  # Optional
             type: Optional[str] = None  # Optional
 
-        input_schema = CreateIssueInput
+        input_schema = IssueWriteInput
     elif original_tool.name == "list_issue_types":
 
         class ListIssueTypesInput(BaseModel):
