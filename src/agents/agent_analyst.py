@@ -11,7 +11,7 @@ from agents.utils import ToolNotFoundError, get_tools_by_names, llm, session_man
 async def get_agent_analyst():
     """Create and configure the duplicate issue analyzer agent."""
     tools = await session_manager.get_tools()
-    tool_names = ["get_issue", "list_issues", "search_issues"]
+    tool_names = ["issue_read", "list_issues", "search_issues"]
 
     try:
         original_tools = await get_tools_by_names(tools, tool_names)
@@ -46,7 +46,7 @@ async def get_agent_analyst():
         You have access to the following GitHub tools:
         - search_issues: Search for issues using keywords
         - list_issues: List issues in the repository
-        - get_issue: Get detailed information about a specific issue
+        - issue_read: Get detailed information about a specific issue
 
         Use these tools strategically to thoroughly search the repository for similar issues. Focus on finding issues with similar titles, descriptions, or concepts.
         """

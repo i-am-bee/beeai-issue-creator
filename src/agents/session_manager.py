@@ -27,9 +27,10 @@ class SessionManager:
         headers = {
             "Authorization": f"Bearer {os.getenv('GITHUB_PAT')}",
             "Accept": "application/json",
+            "X-MCP-Toolsets": "issues,labels",
         }
 
-        self._streams = streamablehttp_client("https://api.githubcopilot.com/mcp/x/issues", headers=headers)
+        self._streams = streamablehttp_client("https://api.githubcopilot.com/mcp", headers=headers)
         streams = await self._streams.__aenter__()
         self._session = ClientSession(streams[0], streams[1])
         await self._session.__aenter__()

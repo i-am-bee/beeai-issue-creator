@@ -164,9 +164,10 @@ uv run ruff format
 
 The system uses the BeeAI Framework's Requirement Agent with:
 - **Conditional Requirements**: Enforced workflow sequence
-- **Handoff Tools**: Agent-to-agent delegation
+- **Handoff Tools**: Agent-to-agent delegation with artifact support
 - **Permission Requirements**: User approval gates
 - **Trajectory Middleware**: Real-time progress tracking
+- **Artifact System**: Out-of-band storage for large content (issue drafts, schemas) to avoid context pollution
 
 ## Documentation
 
@@ -174,21 +175,32 @@ For more information on the BeeAI Framework: https://framework.beeai.dev
 
 ## Roadmap
 
+### WIP
+
 - [ ] 🚧 **Improve multi-turn conversations** - Better context handling across multiple interactions
-- [ ] **Pass artifacts by reference** - Reference artifacts in conversation history instead of including full content
+- [ ] 🚧 **GitHub Issue Types field** - Automatic detection and use of organization issue types with fallback
+- [ ] 🚧 **Pass artifacts by reference** - Reference artifacts in conversation history instead of including full content
+
+### Next
+
+- [ ] **Support OAuth auth flow** - Enable OAuth authentication for GitHub integration
 - [ ] **Treat issues as artifacts** - Return issue drafts as artifacts in A2A protocol instead of messages
-- [ ] **Add evaluation datasets** - Comprehensive testing with real-world issue examples
 - [ ] **Improve agent configuration** - Configure GitHub repository from BeeAI Platform UI
-- [ ] **Add RAG instead of grounding** - Dynamic document retrieval for better context
-- [ ] **Add streaming support** - Real-time response streaming for better UX
 - [ ] **Build as Docker image** - Containerized deployment for easier hosting
-- [ ] **Artifact support** - Enable rich content generation and interactive editing capabilities
-- [x] **GitHub Labels field** - Allow the agent to correctly populate the labels ([#312](https://github.com/github/github-mcp-server/issues/312))
 - [ ] **Support attachements** - Allow users to upload files (screenshots, videos)
-- [ ] 🚧 **GitHub Issue Types Support** - Automatic detection and use of organization issue types with fallback
+
+### Done
+
+- [x] **GitHub Labels field** - Allow the agent to correctly populate the labels ([#312](https://github.com/github/github-mcp-server/issues/312))
 - [x] **MCP direct repository configuration** - Pre-configure the MCP tool with repository settings instead of relying on LLM to pass repository name
 - [x] **Improve trajectory metadata** - Enhanced progress tracking and debugging capabilities
 - [x] **Elicitation support** - Interactive tool use approval and clarification workflows
+
+### Nice to have
+
+- [ ] **Add streaming support** - Real-time response streaming for better UX
+- [ ] **Add RAG instead of grounding** - Dynamic document retrieval for better context
+- [ ] **Add evaluation datasets** - Comprehensive testing with real-world issue examples
 
 ## Contributing
 
