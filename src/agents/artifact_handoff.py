@@ -51,6 +51,7 @@ class HandoffSchema(BaseModel):
     # task: str = Field(description="Clearly defined task for the agent to work on based on his abilities.")
     pass
 
+
 class ArtifactHandoffTool(Tool[HandoffSchema, ToolRunOptions, StringToolOutput]):
     """Delegates a task to an expert agent with artifact management support"""
 
@@ -154,28 +155,26 @@ class ArtifactHandoffTool(Tool[HandoffSchema, ToolRunOptions, StringToolOutput])
             )
 
             # Always return artifact reference with summary
-            return StringToolOutput(
-                f'<artifact id="{artifact_id}" summary="{artifact["summary"]}" />'
-            )
+            return StringToolOutput(f'<artifact id="{artifact_id}" summary="{artifact["summary"]}" />')
 
         # Not an artifact, return as-is
         return StringToolOutput(response_text)
 
     def _generate_artifact_id(self) -> str:
         """Generate a short random artifact ID like 'draft_k3x9'"""
-        suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+        suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=4))
         return f"draft_{suffix}"
 
     def _reveal_artifacts(self, messages: list[AnyMessage]) -> list[AnyMessage]:
         """Replace artifact references with full content in messages."""
         revealed = []
         for msg in messages:
-            content = msg.text if hasattr(msg, 'text') else str(msg.content)
+            content = msg.text if hasattr(msg, "text") else str(msg.content)
             # Simple regex to find <artifact id="..." /> and replace with content
             new_content = re.sub(
                 r'<artifact id="([^"]+)"[^>]*/>',
-                lambda m: self._artifact_store.get(m.group(1), {}).get("content", m.group(0)),
-                content
+                lambda m: self._artifact_store.get(m.group(1)).get("content", m.group(0)),
+                content,
             )
             if new_content != content:
                 if isinstance(msg, UserMessage):
@@ -207,7 +206,7 @@ class ArtifactHandoffTool(Tool[HandoffSchema, ToolRunOptions, StringToolOutput])
             return None
 
         # Split into lines
-        lines = text.split('\n')
+        lines = text.split("\n")
 
         # Find ARTIFACT_SUMMARY line
         summary_line_idx = None
@@ -227,7 +226,7 @@ class ArtifactHandoffTool(Tool[HandoffSchema, ToolRunOptions, StringToolOutput])
         for i in range(summary_line_idx + 1, len(lines)):
             content_lines.append(lines[i])
 
-        content = '\n'.join(content_lines).strip()
+        content = "\n".join(content_lines).strip()
 
         if not content:
             return None
