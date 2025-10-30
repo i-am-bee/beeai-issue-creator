@@ -1,5 +1,4 @@
 import json
-import os
 from textwrap import dedent, indent
 
 from beeai_framework.agents.experimental import RequirementAgent
@@ -12,19 +11,20 @@ from beeai_framework.agents.experimental.requirements.conditional import Conditi
 from beeai_framework.middleware.trajectory import GlobalTrajectoryMiddleware
 from beeai_framework.template import PromptTemplate, PromptTemplateInput
 from beeai_framework.tools import Tool
-from beeai_framework.tools.handoff import HandoffTool
 
 from agents.agent_analyst import get_agent_analyst
 from agents.agent_writer import get_agent_writer
 from agents.artifact_handoff import ArtifactHandoffTool, ArtifactStore
 from agents.artifact_middleware import ArtifactMiddleware
 from agents.simple_think import SimpleThinkTool
-from agents.utils import ToolNotFoundError, create_repo_scoped_tool, get_tools_by_names, llm, session_manager
+from agents.utils import ToolNotFoundError, create_repo_scoped_tool, get_tools_by_names, llm
+from agents.session_context import SessionContext
 
 
-async def get_agent_manager():
+
+async def get_agent_manager(session_context: SessionContext):
     """Create and configure the issue workflow management agent."""
-    tools = await session_manager.get_tools()
+    tools = await session_context.get_tools()
 
     try:
         tools = await get_tools_by_names(tools, ["issue_write", "list_issue_types", "list_label"])
@@ -35,11 +35,11 @@ async def get_agent_manager():
 
         for tool in tools:
             if tool.name == "issue_write":
-                issue_write = await create_repo_scoped_tool(tool)
+                issue_write = await create_repo_scoped_tool(tool, session_context.get_repository())
             elif tool.name == "list_issue_types":
-                list_issue_types = await create_repo_scoped_tool(tool)
+                list_issue_types = await create_repo_scoped_tool(tool, session_context.get_repository())
             elif tool.name == "list_label":
-                list_label = await create_repo_scoped_tool(tool)
+                list_label = await create_repo_scoped_tool(tool, session_context.get_repository())
 
     except ToolNotFoundError as e:
         raise RuntimeError(f"Failed to configure the agent: {e}") from e
@@ -81,13 +81,12 @@ async def get_agent_manager():
     labels_lines = [f"- {label['name']}: {label.get('description', '')}" for label in labels_data]
     labels_text = indent("\n".join(labels_lines), "    ")
 
-    repository = os.getenv("GITHUB_REPOSITORY")
 
     role = "helpful coordinator"
     instruction = f"""\
 As the Coordinator, your responsibilities include routing tasks to experts, managing processes sequentially, and handling all user-facing communication. You do not perform technical writing or reasoning yourself.
 
-You work in the following repository: {repository}
+You work in the following repository: {session_context.get_repository()}
 
 ## Operating Principles
 - Manage the full lifecycle of a GitHub issue from user request to creation.
@@ -214,7 +213,7 @@ You work in the following repository: {repository}
 
     return RequirementAgent(
         name="Project Manager",
-        llm=llm,
+        llm=session_context.get_llm(),
         role=role,
         instructions=instruction,
         tools=[

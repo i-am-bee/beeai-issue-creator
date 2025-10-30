@@ -1,21 +1,14 @@
-import os
 from typing import Literal, Optional
 
+from a2a.types import Message, Role
 import aiohttp
-from beeai_framework.backend import ChatModel
+from beeai_framework.backend import AssistantMessage
+from beeai_framework.backend.message import UserMessage
 from beeai_framework.tools import Tool, tool
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
-from agents.session_manager import SessionManager
-
 load_dotenv()
-
-model = os.getenv("MODEL", "openai:gpt-5-mini")
-llm = ChatModel.from_name(model, {"api_key": os.getenv("API_KEY")})
-
-# Shared singleton instance
-session_manager = SessionManager()
 
 
 class ToolNotFoundError(Exception):
@@ -69,19 +62,16 @@ async def fetch_content(url: str) -> str:
         return ""
 
 
-async def create_repo_scoped_tool(original_tool: Tool) -> Tool:
+async def create_repo_scoped_tool(original_tool: Tool, github_repository: str) -> Tool:
     """Create a wrapper tool that hardcodes owner and repo from GITHUB_REPOSITORY env var.
 
     This function dynamically creates a new tool that:
     1. Takes the original tool's input schema and removes 'owner' and 'repo' fields
-    2. Hardcodes owner and repo from GITHUB_REPOSITORY environment variable
+    2. Hardcodes owner and repo from github_repository
     3. Creates a wrapper function that calls the original tool with the hardcoded values
     """
-    repository = os.getenv("GITHUB_REPOSITORY")
-    if not repository:
-        raise RuntimeError("GITHUB_REPOSITORY environment variable is required")
 
-    owner, repo = repository.split("/")
+    owner, repo = github_repository.split("/")
 
     # Create input models based on the actual schemas (removing owner/repo)
     if original_tool.name == "search_issues":
@@ -175,3 +165,13 @@ async def create_repo_scoped_tool(original_tool: Tool) -> Tool:
     wrapper_tool.name = original_tool.name
 
     return wrapper_tool
+
+
+def to_framework_message(message: Message) -> UserMessage | AssistantMessage:
+    message_text = "".join(part.root.text for part in message.parts if part.root.kind == "text")
+
+    match message.role:
+        case Role.agent:
+            return AssistantMessage(message_text)
+        case Role.user:
+            return UserMessage(message_text)

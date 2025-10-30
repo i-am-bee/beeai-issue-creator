@@ -4,13 +4,13 @@ from beeai_framework.agents.experimental import RequirementAgent
 from beeai_framework.agents.experimental.requirements.conditional import ConditionalRequirement
 from beeai_framework.middleware.trajectory import GlobalTrajectoryMiddleware
 from beeai_framework.tools import Tool
+from agents.session_context import SessionContext
+from agents.utils import ToolNotFoundError, get_tools_by_names, create_repo_scoped_tool
 
-from agents.utils import ToolNotFoundError, get_tools_by_names, llm, session_manager, create_repo_scoped_tool
 
-
-async def get_agent_analyst():
+async def get_agent_analyst(session_context: SessionContext):
     """Create and configure the duplicate issue analyzer agent."""
-    tools = await session_manager.get_tools()
+    tools = await session_context.get_tools()
     tool_names = ["issue_read", "list_issues", "search_issues"]
 
     try:
@@ -18,7 +18,7 @@ async def get_agent_analyst():
         # Create repo-scoped versions of all tools
         available_tools = []
         for tool in original_tools:
-            scoped_tool = await create_repo_scoped_tool(tool)
+            scoped_tool = await create_repo_scoped_tool(tool, session_context.get_repository())
             available_tools.append(scoped_tool)
     except ToolNotFoundError as e:
         raise RuntimeError(f"Failed to configure duplicate finder agent: {e}") from e
@@ -54,7 +54,7 @@ async def get_agent_analyst():
 
     return RequirementAgent(
         name="Analyst",
-        llm=llm,
+        llm=session_context.get_llm(),
         role=role,
         instructions=instruction,
         tools=available_tools,
