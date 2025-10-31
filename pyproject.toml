@@ -1,25 +1,25 @@
 [project]
-name = "beeai-issue-creator"
+name = "github-issue-creator"
 version = "0.1.0"
 readme = "README.md"
 authors = [
-    {name = "Matous Havlena", email = "havlenma@gmail.com"}
+    {name = "Matous Havlena", email = "matous.havlena@ibm.com"}
 ]
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11,<4.0"
 dependencies = [
-    "beeai-framework[beeai-platform]==0.1.59",
-    "aiohttp>=3.13.1",
-    "mcp>=1.19.0",
+    "beeai-framework[agentstack]==0.1.61",
+    "aiohttp>=3.13.2",
+    "mcp>=1.20.0",
     "python-dotenv>=1.2.1",
     "openinference-instrumentation-beeai>=0.1.13",
-    "beeai-sdk>=0.3.7"
+    "agentstack-sdk>=0.4.0"
 ]
 
 [project.optional-dependencies]
 dev = [
     "watchfiles>=1.1.0",
-    "ruff>=0.14.2"
+    "ruff>=0.14.3"
 ]
 
 [tool.ruff]

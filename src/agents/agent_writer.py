@@ -104,7 +104,7 @@ You are the Technical Writer for GitHub issues. Your only task is to draft clear
 
     <issue body>
 
-    🤖 Generated with [BeeAI Issue Creator](https://github.com/i-am-bee/beeai-issue-creator)
+    🤖 Generated with [GitHub Issue Creator](https://github.com/i-am-bee/github-issue-creator)
     ~~~
 - If unclear, respond in plain text asking for clarification.
 - **Title format**:

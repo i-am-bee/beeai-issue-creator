@@ -3,7 +3,7 @@ from textwrap import dedent
 
 from a2a.types import AgentSkill
 from beeai_framework.adapters.beeai_platform.serve.server import BeeAIPlatformServer
-from beeai_sdk.a2a.extensions.ui.agent_detail import AgentDetail
+from agentstack_sdk.a2a.extensions.ui.agent_detail import AgentDetail
 from dotenv import load_dotenv
 from openinference.instrumentation.beeai import BeeAIInstrumentor
 

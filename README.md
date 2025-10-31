@@ -1,9 +1,9 @@
-# BeeAI Issue Creator
+# GitHub Issue Creator
 
 <div align="center">
 
-[![Gitingest](https://img.shields.io/badge/Gitingest-blue?logo=github)](https://gitingest.com/i-am-bee/beeai-issue-creator)
-[![DeepWiki](https://img.shields.io/badge/DeepWiki-blue?logo=wikipedia)](https://deepwiki.com/i-am-bee/beeai-issue-creator)
+[![Gitingest](https://img.shields.io/badge/Gitingest-blue?logo=github)](https://gitingest.com/i-am-bee/github-issue-creator)
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-blue?logo=wikipedia)](https://deepwiki.com/i-am-bee/github-issue-creator)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 </div>
@@ -11,15 +11,15 @@
 > [!WARNING]
 > This project is in early beta stage. Expect bugs and breaking changes.
 
-A multi-agent system for creating well-structured GitHub issues using the [BeeAI Framework](https://framework.beeai.dev/experimental/requirement-agent). This system coordinates between specialized agents to draft issues, check for duplicates, and create final GitHub issues with customizable templates. The system is consumable via the [BeeAI Platform](https://beeai.dev) (UI and CLI) through the A2A protocol.
+A multi-agent system for creating well-structured GitHub issues using the [BeeAI Framework](https://github.com/i-am-bee/beeai-framework). This system coordinates between specialized agents to draft issues, check for duplicates, and create final GitHub issues with customizable templates. The system is consumable via the [Agent Stack](https://github.com/i-am-bee/agentstack) (UI and CLI) through the A2A protocol.
 
 ✅ Multi-agent workflow  
 🔄 Real-time trajectory tracking  
 📝 Customizable issue templates
 
-## What is BeeAI Issue Creator?
+## What is GitHub Issue Creator?
 
-The BeeAI Issue Creator orchestrates a multi-step workflow using specialized agents:
+The GitHub Issue Creator orchestrates a multi-step workflow using specialized agents:
 
 - **Project Manager**: Coordinates the entire workflow and manages agent handoffs
 - **Technical Writer**: Creates structured issue drafts from user input using templates, grounded with project documentation for technical accuracy
@@ -179,7 +179,7 @@ The system uses the BeeAI Framework's Requirement Agent with:
 
 - [ ] **Support OAuth auth flow** - Enable OAuth authentication for GitHub integration
 - [ ] **Treat issues as artifacts** - Return issue drafts as artifacts in A2A protocol instead of messages
-- [ ] **Improve agent configuration** - Configure GitHub repository from BeeAI Platform UI
+- [ ] **Improve agent configuration** - Configure GitHub repository from Agent Stack UI
 - [ ] **Build as Docker image** - Containerized deployment for easier hosting
 - [ ] **Support attachements** - Allow users to upload files (screenshots, videos)
 

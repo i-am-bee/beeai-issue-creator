@@ -2,17 +2,16 @@ import json
 import os
 from textwrap import dedent, indent
 
-from beeai_framework.agents.experimental import RequirementAgent
-from beeai_framework.agents.experimental.prompts import (
+from beeai_framework.agents.requirement import RequirementAgent
+from beeai_framework.agents.requirement.prompts import (
     RequirementAgentSystemPromptInput,
     RequirementAgentTaskPromptInput,
 )
-from beeai_framework.agents.experimental.requirements.ask_permission import AskPermissionRequirement
-from beeai_framework.agents.experimental.requirements.conditional import ConditionalRequirement
+from beeai_framework.agents.requirement.requirements.ask_permission import AskPermissionRequirement
+from beeai_framework.agents.requirement.requirements.conditional import ConditionalRequirement
 from beeai_framework.middleware.trajectory import GlobalTrajectoryMiddleware
 from beeai_framework.template import PromptTemplate, PromptTemplateInput
 from beeai_framework.tools import Tool
-from beeai_framework.tools.handoff import HandoffTool
 
 from agents.agent_analyst import get_agent_analyst
 from agents.agent_writer import get_agent_writer
