@@ -4,15 +4,11 @@ from textwrap import dedent
 from a2a.types import AgentSkill
 from beeai_framework.adapters.beeai_platform.serve.server import BeeAIPlatformServer
 from agentstack_sdk.a2a.extensions.ui.agent_detail import AgentDetail
-from dotenv import load_dotenv
 from openinference.instrumentation.beeai import BeeAIInstrumentor
 
-from agents.agent_manager import get_agent_manager
+from github_issue_creator.agents.manager import get_agent_manager
 
 BeeAIInstrumentor().instrument()
-
-
-load_dotenv()
 
 
 async def run():

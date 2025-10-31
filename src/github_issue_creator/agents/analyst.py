@@ -5,7 +5,9 @@ from beeai_framework.agents.requirement.requirements.conditional import Conditio
 from beeai_framework.middleware.trajectory import GlobalTrajectoryMiddleware
 from beeai_framework.tools import Tool
 
-from agents.utils import ToolNotFoundError, get_tools_by_names, llm, session_manager, create_repo_scoped_tool
+from github_issue_creator.tools.github_tools import create_repo_scoped_tool, get_tools_by_names
+from github_issue_creator.utils.config import llm, session_manager
+from github_issue_creator.utils.exceptions import ToolNotFoundError
 
 
 async def get_agent_analyst():

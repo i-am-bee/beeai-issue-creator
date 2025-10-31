@@ -1,6 +1,3 @@
-# Copyright 2025 © BeeAI a Series of LF Projects, LLC
-# SPDX-License-Identifier: Apache-2.0
-
 import re
 
 from beeai_framework.agents import BaseAgent
@@ -9,7 +6,7 @@ from beeai_framework.backend import MessageTextContent
 from beeai_framework.context import RunContext, RunMiddlewareProtocol
 from beeai_framework.emitter import EmitterOptions, EventMeta
 
-from agents.artifact_handoff import ArtifactStore
+from github_issue_creator.tools.artifact_handoff import ArtifactStore
 
 
 class ArtifactMiddleware(RunMiddlewareProtocol):

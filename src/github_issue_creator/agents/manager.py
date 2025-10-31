@@ -13,12 +13,14 @@ from beeai_framework.middleware.trajectory import GlobalTrajectoryMiddleware
 from beeai_framework.template import PromptTemplate, PromptTemplateInput
 from beeai_framework.tools import Tool
 
-from agents.agent_analyst import get_agent_analyst
-from agents.agent_writer import get_agent_writer
-from agents.artifact_handoff import ArtifactHandoffTool, ArtifactStore
-from agents.artifact_middleware import ArtifactMiddleware
-from agents.simple_think import SimpleThinkTool
-from agents.utils import ToolNotFoundError, create_repo_scoped_tool, get_tools_by_names, llm, session_manager
+from github_issue_creator.agents.analyst import get_agent_analyst
+from github_issue_creator.agents.writer import get_agent_writer
+from github_issue_creator.tools.artifact_handoff import ArtifactHandoffTool, ArtifactStore
+from github_issue_creator.tools.github_tools import create_repo_scoped_tool, get_tools_by_names
+from github_issue_creator.tools.think_tool import SimpleThinkTool
+from github_issue_creator.utils.artifact_middleware import ArtifactMiddleware
+from github_issue_creator.utils.config import llm, session_manager
+from github_issue_creator.utils.exceptions import ToolNotFoundError
 
 
 async def get_agent_manager():

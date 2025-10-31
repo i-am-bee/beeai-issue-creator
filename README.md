@@ -37,9 +37,9 @@ Perfect for:
 
 ## Agents Included
 
-🎯 **[Project Manager](src/agents/agent_manager.py)** - Manages the complete issue lifecycle from draft to creation  
-📝 **[Technical Writer](src/agents/agent_writer.py)** - Creates structured issues using customizable templates  
-🔍 **[Analyst](src/agents/agent_analyst.py)** - Searches for similar existing issues
+🎯 **[Project Manager](src/github_issue_creator/agents/manager.py)** - Manages the complete issue lifecycle from draft to creation
+📝 **[Technical Writer](src/github_issue_creator/agents/writer.py)** - Creates structured issues using customizable templates
+🔍 **[Analyst](src/github_issue_creator/agents/analyst.py)** - Searches for similar existing issues
 
 ## Features
 
@@ -165,7 +165,7 @@ The system uses the BeeAI Framework's Requirement Agent with:
 - **Handoff Tools**: Agent-to-agent delegation with artifact support
 - **Permission Requirements**: User approval gates
 - **Trajectory Middleware**: Real-time progress tracking
-- **[Artifact System](./ARTIFACT_SYSTEM.md)**: Out-of-band storage for large content (issue drafts, schemas) to avoid context pollution
+- **[Artifact System](./docs/ARTIFACT_SYSTEM.md)**: Out-of-band storage for large content (issue drafts, schemas) to avoid context pollution
 
 ## Roadmap
 

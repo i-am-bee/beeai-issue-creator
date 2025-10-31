@@ -3,7 +3,8 @@ import os
 from beeai_framework.agents.tool_calling import ToolCallingAgent
 from beeai_framework.agents.tool_calling.prompts import ToolCallingAgentSystemPrompt, ToolCallingAgentTaskPrompt
 
-from agents.utils import fetch_content, llm
+from github_issue_creator.utils.config import llm
+from github_issue_creator.utils.content import fetch_content
 
 
 async def get_template(template_type: str) -> str:
